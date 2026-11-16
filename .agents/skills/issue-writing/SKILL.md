@@ -66,3 +66,11 @@ In scope: ...  Must not change: ...
 ```
 
 Write the expected count only when the issue fixes the test list; otherwise name the tests.
+
+A UI issue adds (the `ui-evidence` skill):
+
+```text
+- [ ] States S3.empty, S3.markers marked built in docs/UX_FLOWS.md and e2e/screens.ts; the PR's "UI snapshots" comment shows them
+- [ ] F3 enforced: `npm run e2e -- flows/F3` passes within its budget of 4 steps
+- [ ] Owner commented on the snapshot comment (label needs-owner-review)
+```

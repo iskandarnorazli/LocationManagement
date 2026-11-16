@@ -49,4 +49,5 @@ npx playwright install chromium && npm run e2e                     # with the st
 | [docs/API.md](docs/API.md) | Endpoints and schemas |
 | [docs/ERRORS.md](docs/ERRORS.md) | The error envelope and codes |
 | [docs/STATE_MACHINES.md](docs/STATE_MACHINES.md) | Session, upload and form flows |
+| [docs/UX_FLOWS.md](docs/UX_FLOWS.md) | Screens, user flows with step budgets, and how to review the UI |
 | [AGENTS.md](AGENTS.md) | Rules for anyone (or any agent) working on an issue |

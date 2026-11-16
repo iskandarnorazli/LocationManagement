@@ -96,6 +96,7 @@ flowchart TB
 | Reducers vs tables | `checkMachine` (`apps/web/src/test/machine.ts`) | A reducer leaves its table, or a state, event or row has no sample |
 | Model | the seeded model test (#15) | Any user sees something the reference model says they should not |
 | Docs | `check-docs.mjs`, `check-skill-mirror.mjs` | A link is broken; the skill copies differ |
+| UX | `node scripts/check-ux.mjs`; flow specs (`startFlow`) | `docs/UX_FLOWS.md` and `e2e/` disagree on states or flows; a flow takes more steps than its budget |
 
 ## Testing layers (D14, D18)
 
@@ -106,7 +107,8 @@ flowchart TB
 | API model | `apps/api/test/model/` (#15) | Express + Postgres vs `ReferenceModel` | fast-check seed printed on failure |
 | Machines | `apps/web/src/**/*Machine.test.ts` | pure reducers | `checkMachine` plus fast-check event sequences |
 | Hooks and components | `apps/web/src/**/*.test.tsx` | jsdom, stubbed `fetch` | fake timers |
-| End to end | `e2e/*.spec.ts` | the Docker stack | fresh users per test |
+| End to end and flows | `e2e/*.spec.ts`, `e2e/flows/F*.spec.ts` | the Docker stack | fresh users per test |
+| Screenshots (review, not a gate) | `e2e/snapshots.spec.ts` via the "UI snapshots" workflow | the Docker stack | fixed data per state; animations off |
 
 ## Why, and what else was considered
 
