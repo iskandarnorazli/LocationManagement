@@ -96,6 +96,7 @@ flowchart TB
 | Reducers vs tables | `checkMachine` (`apps/web/src/test/machine.ts`) | A reducer leaves its table, or a state, event or row has no sample |
 | Model | the seeded model test (#15) | Any user sees something the reference model says they should not |
 | Docs | `check-docs.mjs`, `check-skill-mirror.mjs` | A link is broken; the skill copies differ |
+| Test guard | `scripts/check-test-diff.mjs` in the `Test guard` workflow | A PR removes or changes an assertion, adds a skip, lowers property-test runs, removes a transition row, raises a step budget or removes a UX row, without the owner's `test-change-approved` label |
 | UX | `node scripts/check-ux.mjs`; flow specs (`startFlow`) | `docs/UX_FLOWS.md` and `e2e/` disagree on states or flows; a flow takes more steps than its budget |
 
 ## Testing layers (D14, D18)
