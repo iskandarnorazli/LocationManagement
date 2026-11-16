@@ -1,0 +1,104 @@
+name: CI
+
+# Every push to main, every pull request, and on demand. Ubuntu and Windows run the same
+# `npm run ci` (lint, typecheck, doc checks, unit and API tests against a real Postgres, build).
+# Ubuntu also runs the stack in Docker and the Playwright end-to-end tests.
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  test-linux:
+    name: Test (ubuntu-latest)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    services:
+      postgres:
+        image: postgres:16-alpine
+        env:
+          POSTGRES_USER: app
+          POSTGRES_PASSWORD: app
+          POSTGRES_DB: app_test
+        ports: [ "5432:5432" ]
+        options: >-
+          --health-cmd "pg_isready -U app -d app_test"
+          --health-interval 2s --health-timeout 5s --health-retries 30
+    env:
+      DATABASE_URL: postgres://app:app@localhost:5432/app_test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - run: npm run ci
+
+  test-windows:
+    name: Test (windows-latest)
+    runs-on: windows-latest
+    timeout-minutes: 25
+    env:
+      DATABASE_URL: postgres://app:app@localhost:5432/app_test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      # Windows runners cannot run service containers. The image ships PostgreSQL as a stopped
+      # service, with PGBIN set and the superuser postgres / root.
+      - name: Start the preinstalled PostgreSQL
+        shell: pwsh
+        run: |
+          if (-not $env:PGBIN) { throw "PGBIN is not set: this runner image has no preinstalled PostgreSQL" }
+          $svc = Get-Service -Name "postgresql*" | Select-Object -First 1
+          Set-Service -InputObject $svc -StartupType Automatic
+          Start-Service -InputObject $svc
+          & "$env:PGBIN\pg_isready" -h localhost -t 30
+          $env:PGPASSWORD = "root"
+          & "$env:PGBIN\psql" -h localhost -U postgres -c "CREATE ROLE app LOGIN SUPERUSER PASSWORD 'app';"
+          & "$env:PGBIN\psql" -h localhost -U postgres -c "CREATE DATABASE app_test OWNER app;"
+          if ($LASTEXITCODE -ne 0) { exit 1 }
+      - run: npm ci
+      - run: npm run ci
+
+  e2e:
+    name: Stack in Docker + end to end (ubuntu-latest)
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+      - run: npm ci
+      - name: Start db and api (docker compose)
+        run: |
+          docker compose up -d --build --wait
+          curl -sf http://127.0.0.1:3000/health/ready
+      - name: Install the Playwright browser
+        run: npx playwright install --with-deps chromium
+      - name: Playwright
+        run: npm run e2e
+      - name: API logs
+        if: always()
+        run: docker compose logs api | tail -100
+      - uses: actions/upload-artifact@v4
+        if: failure()
+        with:
+          name: playwright-report
+          path: |
+            playwright-report/
+            test-results/
