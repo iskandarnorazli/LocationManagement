@@ -1,0 +1,36 @@
+name: Docker image
+
+# On a v* tag: build the API image, smoke-test it against Postgres, and push it to ghcr.io (R20).
+# The image is also built on every PR by ci.yml's e2e job, through docker compose.
+
+on:
+  push:
+    tags: [ "v*" ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  image:
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and smoke test
+        run: |
+          set -euo pipefail
+          docker compose up -d --build --wait
+          curl -sf http://127.0.0.1:3000/health/ready
+          docker compose stop -t 20 api
+          [ "$(docker inspect -f '{{.State.ExitCode}}' "$(docker compose ps -aq api)")" = 0 ]
+      - name: Push to ghcr.io
+        if: startsWith(github.ref, 'refs/tags/v')
+        run: |
+          echo "${{ secrets.GITHUB_TOKEN }}" | docker login ghcr.io -u "${{ github.actor }}" --password-stdin
+          image="ghcr.io/$(echo '${{ github.repository }}' | tr '[:upper:]' '[:lower:]')-api"
+          docker tag "$(docker compose images -q api)" "$image:${GITHUB_REF_NAME}"
+          docker tag "$(docker compose images -q api)" "$image:latest"
+          docker push "$image:${GITHUB_REF_NAME}"
+          docker push "$image:latest"
