@@ -27,13 +27,14 @@ milestones and [`docs/ROADMAP.md`](docs/ROADMAP.md).
 - Work only on issues labelled `ready:antigravity` with no `wip:` label. An empty queue means stop and say so.
 - An issue blocked by another (first line "Blocked by #N") waits until #N is closed.
 - Never start an issue labelled `outline` or `needs-decision`.
-- These need Claude or the owner. Stop with `needs-decision` and say which:
+- Building these as their decisions and docs say is open to any agent; *changing* them needs the owner. Stop with `needs-decision` and say which:
   - authentication: password hashing, JWT signing, verification or storage (D5, D6);
   - the user-isolation rule (D7): any query on `locations` without `user_id`;
   - the ZIP and text-file acceptance rules (D9, D10);
   - the error envelope or an error code's meaning (`docs/ERRORS.md`);
   - a change to `docs/API.md` that a client would notice;
   - any decision in `docs/ARCHITECTURE.md`. A test never reverses one.
+- A PR that touches authentication, isolation, or the ZIP and text parsers gets a challenger review (pstack's `interrogate`, or Antigravity's challenger role) before it leaves draft. The issue says so in its Gate.
 
 ## How an issue is worked
 
