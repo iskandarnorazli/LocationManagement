@@ -10,7 +10,8 @@ as numbered requirements R1-R20, is [`docs/REQUIREMENTS.md`](docs/REQUIREMENTS.m
 assessor's requirement, and only the owner changes it.
 Decisions are numbered in [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md); the HTTP contract is
 [`docs/API.md`](docs/API.md); errors are [`docs/ERRORS.md`](docs/ERRORS.md); flows with states
-are [`docs/STATE_MACHINES.md`](docs/STATE_MACHINES.md). The plan of record is the GitHub
+are [`docs/STATE_MACHINES.md`](docs/STATE_MACHINES.md); screens, user flows and their step budgets are
+[`docs/UX_FLOWS.md`](docs/UX_FLOWS.md). The plan of record is the GitHub
 milestones and [`docs/ROADMAP.md`](docs/ROADMAP.md).
 
 ## Layout
@@ -21,6 +22,28 @@ milestones and [`docs/ROADMAP.md`](docs/ROADMAP.md).
 | `apps/web` | Vite + React SPA, Tailwind, react-router, Zustand, react-leaflet |
 | `packages/shared` | zod schemas and error codes shared by api and web: the contract in code |
 | `.agents/state/` | task state (the `task-state` skill); the handoff between agents |
+
+## The skeleton is the contract (D17-D20)
+
+The code's shape already exists: every module, type and signature the issues need is in the
+tree, with bodies that call `notImplemented('#<issue> ...')`. An issue fills the bodies its
+number names.
+
+- **Do not change a skeleton signature, type, export or file location.** If the body cannot be written behind the signature as it is, stop with `needs-decision` and say what the signature lacks.
+- **Do not add a module, folder or second way to do a task** the skeleton already covers (an HTTP client, a database helper, a validation step).
+- **Every response a test reads goes through `expectBody(res, status, Schema)`** (`apps/api/test/helpers.ts`) with the strict schema from `@lm/shared`.
+- **API tests use `testApp` / `testDeps`**: a fixed clock and sequential ids. A test that needs time to pass calls `clock.advance(ms)`; nothing sleeps.
+- **A reducer's test calls `checkMachine`** (`apps/web/src/test/machine.ts`) with a sample of every state kind and event type, then adds the case tests the issue lists.
+- The full list of checks is "What enforces it" in `docs/ARCHITECTURE.md`. All run in `npm run ci`.
+
+## UI work is reviewed from screenshots
+
+Follow the `ui-evidence` skill for any change to what a screen shows, any UI bug and any design
+option. In short: states and flows have ids in `docs/UX_FLOWS.md`; built states are captured by
+`npm run snapshots`, flows count their steps against the doc's budget in `npm run e2e`; the
+"UI snapshots" workflow posts before/after images on the PR; a UI PR carries
+`needs-owner-review` and leaves draft only after the owner has commented. Bugs and UX findings
+use the Bug and UX feedback forms with a screenshot.
 
 ## Which issues
 
@@ -54,7 +77,10 @@ milestones and [`docs/ROADMAP.md`](docs/ROADMAP.md).
 | Web unit tests | `npm test -w apps/web` |
 | End to end (whole stack) | `docker compose up -d --build && npm run e2e` |
 | Docs name files that exist | `node scripts/check-docs.mjs` |
+| Charts match transition tables | `node scripts/check-state-machines.mjs` |
 | Skill mirror in sync | `node scripts/check-skill-mirror.mjs` |
+| UX doc matches e2e code | `node scripts/check-ux.mjs` |
+| Screenshots of every built state | `SNAP_DIR=snapshots npm run snapshots` |
 
 Postgres for local tests: `docker compose up -d db`, then
 `DATABASE_URL=postgres://app:app@localhost:5432/app_test`.

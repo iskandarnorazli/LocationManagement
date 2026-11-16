@@ -1,22 +1,22 @@
-import { randomUUID } from 'node:crypto';
+// The composition root (D17): the one place that wires features to their dependencies.
+// It builds the app without listening, so tests drive it with supertest.
 import express, { type Express } from 'express';
-import type { Pool } from 'pg';
 import { pinoHttp } from 'pino-http';
-import type { Logger } from 'pino';
+import { authRouter } from './auth';
+import type { Deps } from './deps';
 import { errorHandler, notFound } from './http/errorHandler';
 import { healthRouter } from './http/health';
+import { importRouter } from './import';
+import { locationsRouter } from './locations';
 
-export type AppDeps = { pool: Pool; logger: Logger };
-
-// Builds the app without listening, so tests drive it with supertest.
-export function createApp({ pool, logger }: AppDeps): Express {
+export function createApp(deps: Deps): Express {
   const app = express();
   app.disable('x-powered-by');
   app.use(
     pinoHttp({
-      logger,
+      logger: deps.logger,
       genReqId: (_req, res) => {
-        const id = randomUUID();
+        const id = deps.ids.uuid();
         res.setHeader('X-Request-Id', id);
         return id;
       },
@@ -24,8 +24,10 @@ export function createApp({ pool, logger }: AppDeps): Express {
   );
   app.use(express.json({ limit: '100kb' }));
 
-  app.use('/health', healthRouter(pool));
-  // M1 mounts /api/auth and /api/locations here (docs/API.md).
+  app.use('/health', healthRouter(deps.db));
+  app.use('/api/auth', authRouter(deps));
+  app.use('/api/locations/import', importRouter(deps));
+  app.use('/api/locations', locationsRouter(deps));
 
   app.use(notFound);
   app.use(errorHandler);
