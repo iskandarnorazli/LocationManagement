@@ -72,4 +72,5 @@ Postgres for local tests: `docker compose up -d db`, then
 - **ZIPs made by macOS Finder add `__MACOSX/` entries.** D9 ignores them (and directory entries and `.DS_Store`); every other extra entry is an error.
 - **The sample file has a header row and spaces after commas** (`Name, Latitude, Longitude`). The parser rules are D10.
 - **Windows runners have no service containers.** CI's Windows job starts the preinstalled PostgreSQL instead (see `.github/workflows/ci.yml`).
+- **`workflow_dispatch` only finds workflows on `main`.** A new workflow file runs by dispatch only after it is merged.
 - **Stage files by name**, never `git add -A`: `.env` files hold secrets and are git-ignored, keep it that way.
