@@ -14,7 +14,7 @@
     "typecheck": "tsc -p tsconfig.json && npm run typecheck --workspaces --if-present",
     "test": "npm run test --workspaces --if-present",
     "build": "npm run build --workspaces --if-present",
-    "check:docs": "node scripts/check-docs.mjs && node scripts/check-skill-mirror.mjs",
+    "check:docs": "node scripts/check-docs.mjs && node scripts/check-skill-mirror.mjs && node scripts/check-state-machines.mjs",
     "ci": "npm run lint && npm run typecheck && npm run check:docs && npm test && npm run build",
     "e2e": "playwright test",
     "format": "prettier --write ."
