@@ -1,6 +1,6 @@
 // The oracle for the seeded model-based API test (D18). A tiny in-memory version of what the API
 // promises in docs/API.md and docs/ERRORS.md, with no SQL, no HTTP and no crypto. The model test
-// (issue #14) runs the same random command sequence against this and against the real API on
+// (issue #15) runs the same random command sequence against this and against the real API on
 // Postgres, and after every command compares what each user sees.
 import type { NewLocation } from '@lm/shared';
 

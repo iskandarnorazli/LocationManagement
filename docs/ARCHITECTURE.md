@@ -88,12 +88,13 @@ flowchart TB
 | Check | Command (all in `npm run ci`) | Fails when |
 |---|---|---|
 | Lint | `npm run lint` | A rule in the module map is broken |
+| Lint rules themselves | `node scripts/check-lint-rules.mjs` | A rule stops reporting its known violation, or reports an allowed case |
 | Types | `npm run typecheck` | A skeleton signature is changed in one place only |
 | Contract | `expectBody(res, status, Schema)` in `apps/api/test/helpers.ts` | A response has another status or does not parse with the strict shared schema (an extra field such as a token fails) |
 | Error codes | `apps/api/test/errors.test.ts` | `docs/ERRORS.md` and `ERROR_CODES` differ |
 | Charts vs tables | `node scripts/check-state-machines.mjs` | A chart and its transition table differ, or a table has no chart |
 | Reducers vs tables | `checkMachine` (`apps/web/src/test/machine.ts`) | A reducer leaves its table, or a state, event or row has no sample |
-| Model | the seeded model test (#14) | Any user sees something the reference model says they should not |
+| Model | the seeded model test (#15) | Any user sees something the reference model says they should not |
 | Docs | `check-docs.mjs`, `check-skill-mirror.mjs` | A link is broken; the skill copies differ |
 
 ## Testing layers (D14, D18)
@@ -102,7 +103,7 @@ flowchart TB
 |---|---|---|---|
 | Pure units and properties | `parseLocations`, `readSingleTextFile`, `password`, shared schemas | nothing external | fast-check with a fixed seed |
 | API examples and contract | `apps/api/test/*.test.ts` | Express + real Postgres | `fixedClock`, `sequentialIds`, `resetData` |
-| API model | `apps/api/test/model/` (#14) | Express + Postgres vs `ReferenceModel` | fast-check seed printed on failure |
+| API model | `apps/api/test/model/` (#15) | Express + Postgres vs `ReferenceModel` | fast-check seed printed on failure |
 | Machines | `apps/web/src/**/*Machine.test.ts` | pure reducers | `checkMachine` plus fast-check event sequences |
 | Hooks and components | `apps/web/src/**/*.test.tsx` | jsdom, stubbed `fetch` | fake timers |
 | End to end | `e2e/*.spec.ts` | the Docker stack | fresh users per test |
