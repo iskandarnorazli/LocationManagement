@@ -56,6 +56,18 @@ jobs:
           npx playwright test --project=snapshots --project=e2e
           echo "status=$?" >> "$GITHUB_ENV"
           mkdir -p snapshots
+      - name: Flow videos as GIFs
+        run: |
+          shopt -s nullglob
+          videos=(snapshots/videos/*.webm)
+          [ ${#videos[@]} -eq 0 ] && exit 0
+          command -v ffmpeg >/dev/null || { sudo apt-get update -q && sudo apt-get install -y -q ffmpeg; }
+          for v in "${videos[@]}"; do
+            ffmpeg -loglevel error -y -i "$v" \
+              -vf "fps=10,scale=640:-1:flags=lanczos,split[a][b];[a]palettegen=max_colors=96[p];[b][p]paletteuse" \
+              -loop 0 "${v%.webm}.gif"
+          done
+          ls -la snapshots/videos
       - name: Where the images go
         run: |
           case "${{ github.event_name }}" in

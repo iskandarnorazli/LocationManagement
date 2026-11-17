@@ -1,6 +1,6 @@
 // Builds the "UI snapshots" comment from a checkout of the ui-snapshots branch.
 //   node scripts/snapshot-comment.mjs <snapshots checkout> <dest dir> <before dir> > comment.md
-// <dest dir> holds this run's screens/ and flows/; <before dir> (main/latest) the same for main.
+// <dest dir> holds this run's screens/, flows/ and videos/ (<Flow>.gif and .webm); <before dir> (main/latest) the same for main.
 // Screens whose bytes differ from main come first; unchanged ones fold into a <details>.
 // Env: GITHUB_REPOSITORY (owner/repo), SNAP_TITLE (first line), SNAP_SHA (commit shown).
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
@@ -46,6 +46,16 @@ if (flows.length) {
   for (const f of flows) {
     const steps = list(`${dest}/flows/${f}`);
     out.push(`**${f}**: ${steps.length} steps`, '', steps.map((s) => img(`${dest}/flows/${f}/${s}`, 220)).join(' '), '', steps.map((s, i) => `${i + 1}. ${s.replace(/^\d+-|\.png$/g, '').replace(/-/g, ' ')}`).join('\n'), '');
+  }
+}
+const videos = list(`${dest}/videos`).filter((v) => v.endsWith('.gif'));
+if (videos.length) {
+  out.push('### Flow videos', '');
+  for (const v of videos) {
+    const flow = v.replace(/\.gif$/, '');
+    const webm = `${dest}/videos/${flow}.webm`;
+    const full = existsSync(path.join(root, webm)) ? ` ([full video](https://github.com/${repo}/blob/ui-snapshots/${webm}?raw=true))` : '';
+    out.push(`**${flow}**${full}`, '', img(`${dest}/videos/${v}`, 640), '');
   }
 }
 process.stdout.write(out.join('\n'));

@@ -11,7 +11,13 @@ export default defineConfig({
   globalTeardown: './e2e/global-teardown.ts',
   use: { baseURL: 'http://localhost:5173', trace: 'retain-on-failure' },
   projects: [
-    { name: 'e2e', testIgnore: /snapshots\.spec\.ts/ },
+    {
+      name: 'e2e',
+      testIgnore: /snapshots\.spec\.ts/,
+      // With SNAP_DIR set (the UI snapshots workflow), each flow is also recorded as a video:
+      // e2e/test.ts saves it to SNAP_DIR/videos/<Flow>.webm, and the workflow makes a GIF of it.
+      use: { video: process.env.SNAP_DIR ? { mode: 'on', size: { width: 960, height: 540 } } : 'off' },
+    },
     { name: 'snapshots', testMatch: /snapshots\.spec\.ts/ },
   ],
   webServer: {
