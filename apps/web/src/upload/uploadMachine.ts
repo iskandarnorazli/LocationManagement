@@ -1,7 +1,6 @@
 // docs/STATE_MACHINES.md "Upload". Issue #9 fills the reducer; useUploadFlow runs the timer.
 import type { Location } from '@lm/shared';
 import type { Transition } from '../lib/machine';
-import { notImplemented } from '../lib/notImplemented';
 import type { ApiError } from '../api/client';
 
 export const POPUP_MS = 3000;
@@ -39,5 +38,24 @@ export const UPLOAD_TRANSITIONS: ReadonlyArray<Transition<UploadKind, UploadEven
 export const initialUpload: UploadState = { kind: 'idle' };
 
 export function uploadReducer(state: UploadState, event: UploadEvent): UploadState {
-  return notImplemented('#9 uploadReducer', { state, event });
+  switch (state.kind) {
+    case 'idle':
+      if (event.type === 'CHOOSE') return { kind: 'chosen', file: event.file };
+      return state;
+
+    case 'chosen':
+      if (event.type === 'CHOOSE') return { kind: 'chosen', file: event.file };
+      if (event.type === 'SUBMIT') return { kind: 'uploading', file: state.file };
+      return state;
+
+    case 'uploading':
+      if (event.type === 'UPLOAD_OK') return { kind: 'succeeded', locations: event.locations };
+      if (event.type === 'UPLOAD_ERROR') return { kind: 'failed', error: event.error };
+      return state;
+
+    case 'succeeded':
+    case 'failed':
+      if (event.type === 'TIMER_DONE') return { kind: 'idle' };
+      return state;
+  }
 }
