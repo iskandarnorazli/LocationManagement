@@ -49,6 +49,7 @@ flowchart LR
 | D18 | Tests are deterministic. Time and ids come from the `Clock` and `Ids` ports in `apps/api/src/ports.ts`; tests use `fixedClock` and `sequentialIds`. A seeded model-based test runs random command sequences for several users against the real API on Postgres and against `test/model/referenceModel.ts`, and compares what each user sees after every command. A failure prints the seed that replays it. Full simulation (simulated database, network, scheduler) was considered and rejected: nothing here is concurrent or distributed. | decided (owner, 2026-11-16) |
 | D19 | Frontend state machines are reducers over discriminated unions with the transition table exported as data (`apps/web/src/lib/machine.ts`). Considered: XState (a dependency and a learning curve for assessors), stores with flags (the drift this avoids). | decided (owner, 2026-11-16) |
 | D20 | The architecture is enforced by checks, not by prose. The list is in "What enforces it" below; a new rule goes there and into CI in the same change. | decided (owner, 2026-11-16) |
+| D22 | Locations list in insertion order, by an identity column `seq` (owner, 2026-11-17). | decided (owner, 2026-11-17) |
 
 ## Limits (D21)
 
