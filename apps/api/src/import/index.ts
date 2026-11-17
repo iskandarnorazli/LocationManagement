@@ -1,1 +1,1 @@
-export { importRouter } from './routes';
+export { importRouter, MAX_UPLOAD_BYTES } from './routes';
