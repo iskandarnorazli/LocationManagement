@@ -10,14 +10,6 @@ export type ScreenState = {
 
 export const SCREENS: ScreenState[] = [
   {
-    id: 'S0.home',
-    status: 'built',
-    open: async (page) => {
-      await page.goto('/');
-      await page.getByRole('heading', { name: 'Location Management' }).waitFor();
-    },
-  },
-  {
     id: 'S1.empty',
     status: 'built',
     open: async (page) => {
@@ -75,7 +67,23 @@ export const SCREENS: ScreenState[] = [
   { id: 'S3.markers', status: 'planned' },
   { id: 'S3.popup', status: 'planned' },
   { id: 'S3.invalid', status: 'planned' },
-  { id: 'S3.nav', status: 'planned' },
+  {
+    id: 'S3.nav',
+    status: 'built',
+    open: async (page) => {
+      const email = `nav-${Date.now()}@example.com`;
+      await page.request.post('/api/auth/register', {
+        data: { email, password: 'password123' },
+      });
+      await page.goto('/map');
+      await page.getByRole('heading', { name: 'Map' }).waitFor();
+      const menuButton = page.getByRole('button', { name: 'Open menu' });
+      if (await menuButton.isVisible()) {
+        await menuButton.click();
+        await page.getByRole('dialog').waitFor();
+      }
+    },
+  },
   { id: 'S3.sheetOpen', status: 'planned' },
   { id: 'S3.focus', status: 'planned' },
   { id: 'S4.idle', status: 'planned' },

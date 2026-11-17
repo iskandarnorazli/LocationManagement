@@ -1,4 +1,5 @@
 import { Navigate, Route, Routes } from 'react-router';
+import { AppShell } from '../layout/AppShell';
 import { LoginPage } from '../pages/LoginPage';
 import { MapPage } from '../pages/MapPage';
 import { NotFoundPage } from '../pages/NotFoundPage';
@@ -13,8 +14,10 @@ export function AppRoutes() {
       <Route path="/register" element={<RegisterPage />} />
       <Route path="/login" element={<LoginPage />} />
       <Route element={<RequireAuth />}>
-        <Route path="/map" element={<MapPage />} />
-        <Route path="/upload" element={<UploadPage />} />
+        <Route element={<AppShell />}>
+          <Route path="/map" element={<MapPage />} />
+          <Route path="/upload" element={<UploadPage />} />
+        </Route>
       </Route>
       <Route path="*" element={<NotFoundPage />} />
     </Routes>

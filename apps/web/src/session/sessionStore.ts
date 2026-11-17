@@ -1,6 +1,8 @@
 import { UserResponse, type Credentials } from '@lm/shared';
+import { z } from 'zod';
 import { create } from 'zustand';
 import { api, ApiError, setOnUnauthorized } from '../api/client';
+import { useLocationsStore } from '../map/locationsStore';
 import { initialSession, sessionReducer, type SessionEvent, type SessionState } from './sessionMachine';
 
 type SessionStore = {
@@ -9,6 +11,7 @@ type SessionStore = {
   checkSession: () => Promise<void>;
   register: (credentials: Credentials) => Promise<void>;
   login: (credentials: Credentials) => Promise<void>;
+  logout: () => Promise<void>;
 };
 
 async function submitAuth(
@@ -51,6 +54,15 @@ export const useSessionStore = create<SessionStore>((set, get) => ({
   },
   register: (credentials) => submitAuth(get().dispatch, 'REGISTER', '/auth/register', credentials),
   login: (credentials) => submitAuth(get().dispatch, 'LOGIN', '/auth/login', credentials),
+  logout: async () => {
+    try {
+      await api('/auth/logout', { method: 'POST', schema: z.undefined() });
+    } catch {
+      // A network error still signs out locally.
+    }
+    get().dispatch({ type: 'LOGOUT' });
+    useLocationsStore.getState().reset();
+  },
 }));
 
 setOnUnauthorized(() => {
