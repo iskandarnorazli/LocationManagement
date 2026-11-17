@@ -1,6 +1,7 @@
 import { ErrorBody, UserResponse } from '@lm/shared';
 import request from 'supertest';
-import { afterAll, beforeEach, describe, expect, it } from 'vitest';
+import { afterAll, beforeEach, describe, expect, it, vi } from 'vitest';
+import * as passwordModule from '../src/auth/password';
 import { asUserId } from '../src/auth/userId';
 import { signSession } from '../src/auth/session';
 import { fixedClock } from '../src/ports';
@@ -195,5 +196,21 @@ describe('auth endpoints and session cookie (D6)', () => {
     const me = await agent.get('/api/auth/me');
     const err = expectBody(me, 401, ErrorBody);
     expect(err.error.code).toBe('TOKEN_EXPIRED');
+  });
+
+  it('login with an unknown email still runs verifyPassword once', async () => {
+    const app = testApp(pool);
+    const spy = vi.spyOn(passwordModule, 'verifyPassword');
+    try {
+      const res = await request(app)
+        .post('/api/auth/login')
+        .send({ email: 'nobody@example.com', password: 'password123' });
+
+      const err = expectBody(res, 401, ErrorBody);
+      expect(err.error.code).toBe('INVALID_CREDENTIALS');
+      expect(spy).toHaveBeenCalledTimes(1);
+    } finally {
+      spy.mockRestore();
+    }
   });
 });

@@ -3,11 +3,13 @@ import { Credentials } from '@lm/shared';
 import { Router } from 'express';
 import type { Deps } from '../deps';
 import { AppError } from '../http/AppError';
-import { hashPassword, verifyPassword } from './password';
+import * as passwordModule from './password';
 import { requireAuth, userIdOf } from './requireAuth';
 import { sessionCookie, signSession } from './session';
 import { asUserId } from './userId';
 import { createUser, findUserByEmail, findUserById } from './usersRepo';
+
+const DUMMY_HASH_PROMISE = passwordModule.hashPassword('dummy-password-for-constant-time-login');
 
 export function authRouter(deps: Deps): Router {
   const router = Router();
@@ -15,7 +17,7 @@ export function authRouter(deps: Deps): Router {
 
   router.post('/register', async (req, res) => {
     const { email, password } = Credentials.parse(req.body);
-    const passwordHash = await hashPassword(password);
+    const passwordHash = await passwordModule.hashPassword(password);
     const user = await createUser(deps.db, {
       id: deps.ids.uuid(),
       email,
@@ -29,7 +31,9 @@ export function authRouter(deps: Deps): Router {
   router.post('/login', async (req, res) => {
     const { email, password } = Credentials.parse(req.body);
     const row = await findUserByEmail(deps.db, email);
-    if (!row || !(await verifyPassword(password, row.passwordHash))) {
+    const hashToCheck = row ? row.passwordHash : await DUMMY_HASH_PROMISE;
+    const passwordValid = await passwordModule.verifyPassword(password, hashToCheck);
+    if (!row || !passwordValid) {
       throw new AppError('INVALID_CREDENTIALS', 'Invalid email or password.');
     }
     const token = await signSession(asUserId(row.id), deps.clock, deps.config.JWT_SECRET);
