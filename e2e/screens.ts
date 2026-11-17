@@ -2,6 +2,7 @@
 // A built state has `open`, which brings a fresh page to exactly that state with fixed data.
 import type { Page } from '@playwright/test';
 import { poolEmail, POOL_PASSWORD, signInAs } from './auth';
+import { KL_IMPORTED, KL_SAVED, mapReady, stubLocations, tilesLoaded } from './locations';
 
 export type ScreenState = {
   id: string;
@@ -60,10 +61,53 @@ export const SCREENS: ScreenState[] = [
       await page.getByRole('alert').waitFor();
     },
   },
-  { id: 'S3.empty', status: 'planned' },
-  { id: 'S3.markers', status: 'planned' },
-  { id: 'S3.popup', status: 'planned' },
-  { id: 'S3.invalid', status: 'planned' },
+  {
+    id: 'S3.empty',
+    status: 'built',
+    open: async (page) => {
+      await signInAs(page);
+      await stubLocations(page, []);
+      await page.goto('/map');
+      await mapReady(page, 0);
+    },
+  },
+  {
+    id: 'S3.markers',
+    status: 'built',
+    open: async (page) => {
+      await signInAs(page);
+      await stubLocations(page, KL_SAVED);
+      await page.goto('/map');
+      await mapReady(page, 3);
+    },
+  },
+  {
+    id: 'S3.popup',
+    status: 'built',
+    open: async (page) => {
+      await signInAs(page);
+      await stubLocations(page, KL_SAVED);
+      await page.goto('/map');
+      await mapReady(page, 3);
+      await page.getByRole('button', { name: 'Suria KLCC' }).click();
+      await page.locator('.leaflet-popup').getByText('Suria KLCC').waitFor();
+    },
+  },
+  {
+    id: 'S3.invalid',
+    status: 'built',
+    open: async (page) => {
+      await signInAs(page);
+      await stubLocations(page, KL_SAVED);
+      await page.goto('/map');
+      await mapReady(page, 3);
+      await page.getByLabel('Name').fill('Menara KL');
+      await page.getByLabel('Latitude').fill('91');
+      await page.getByLabel('Longitude').fill('101.7038');
+      await page.getByRole('button', { name: 'Add', exact: true }).click();
+      await page.locator('#location-latitude-error').waitFor();
+    },
+  },
   {
     id: 'S3.nav',
     status: 'built',
@@ -78,8 +122,36 @@ export const SCREENS: ScreenState[] = [
       }
     },
   },
-  { id: 'S3.sheetOpen', status: 'planned' },
-  { id: 'S3.focus', status: 'planned' },
+  {
+    id: 'S3.sheetOpen',
+    status: 'built',
+    open: async (page) => {
+      await signInAs(page);
+      await stubLocations(page, KL_SAVED);
+      await page.goto('/map');
+      await mapReady(page, 3);
+      await page.getByRole('button', { name: 'Swipe up for your locations (3)' }).click();
+      await page.getByRole('heading', { name: 'Your locations (3)' }).waitFor();
+    },
+  },
+  {
+    id: 'S3.focus',
+    status: 'built',
+    open: async (page) => {
+      await signInAs(page);
+      await stubLocations(page, [...KL_SAVED, ...KL_IMPORTED]);
+      await page.goto('/map');
+      await mapReady(page, 6);
+      // As the upload page's link does (D13): navigate with router state { focusIds }.
+      const focusIds = KL_IMPORTED.map((l) => l.id);
+      await page.evaluate((ids) => {
+        window.history.pushState({ usr: { focusIds: ids }, key: 'focus', idx: 1 }, '', '/map');
+        window.dispatchEvent(new PopStateEvent('popstate', { state: window.history.state }));
+      }, focusIds);
+      await page.getByRole('heading', { name: 'Your locations (6)' }).waitFor();
+      await tilesLoaded(page);
+    },
+  },
   { id: 'S4.idle', status: 'planned' },
   { id: 'S4.chosen', status: 'planned' },
   { id: 'S4.success', status: 'planned' },

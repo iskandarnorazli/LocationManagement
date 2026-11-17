@@ -98,7 +98,7 @@ export function AppShell() {
   };
 
   return (
-    <div className="flex min-h-screen flex-col md:flex-row">
+    <div className="flex h-dvh flex-col md:flex-row">
       <header className="flex items-center gap-3 bg-slate-900 px-4 py-3 text-white md:hidden">
         <button
           ref={menuButtonRef}
@@ -150,7 +150,7 @@ export function AppShell() {
         </div>
       )}
 
-      <main className="min-w-0 flex-1">
+      <main className="relative min-h-0 min-w-0 flex-1 overflow-y-auto">
         <Outlet />
       </main>
     </div>

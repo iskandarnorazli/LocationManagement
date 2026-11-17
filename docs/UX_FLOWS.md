@@ -54,13 +54,13 @@ its rows to `built` and adds the setup in `e2e/screens.ts`.
 | S1.taken | Register | "An account with this email already exists." | built |
 | S2.empty | Login | Empty form | built |
 | S2.wrong | Login | "Email or password is incorrect." | built |
-| S3.empty | Map | A new user's map: no markers, the form empty | planned |
-| S3.markers | Map | Three markers in Kuala Lumpur | planned |
-| S3.popup | Map | A marker's popup showing its name (R9) | planned |
-| S3.invalid | Map | The form with latitude 91: field error, nothing sent | planned |
+| S3.empty | Map | A new user's map: no markers, the form empty | built |
+| S3.markers | Map | Three markers in Kuala Lumpur | built |
+| S3.popup | Map | A marker's popup showing its name (R9) | built |
+| S3.invalid | Map | The form with latitude 91: field error, nothing sent | built |
 | S3.nav | Map | Phone: the sidebar drawer open over the map (R2, D23) | built |
-| S3.sheetOpen | Map | The sheet swiped up: the form and "Your locations (3)" (D23) | planned |
-| S3.focus | Map | Opened from "See them on the map": zoomed to the new markers, sheet open, new rows highlighted (D13) | planned |
+| S3.sheetOpen | Map | The sheet swiped up: the form and "Your locations (3)" (D23) | built |
+| S3.focus | Map | Opened from "See them on the map": zoomed to the new markers, sheet open, new rows highlighted (D13) | built |
 | S4.idle | Upload | No file chosen | planned |
 | S4.chosen | Upload | A file chosen, ready to send | planned |
 | S4.success | Upload | The success popup (R11) | planned |
@@ -76,8 +76,8 @@ exists and fails CI over budget; `planned` means its pages are not built yet.
 |---|---|---|---|---|---|
 | F1 | Create an account | S1, empty | 3 | enforced | R1, R3 |
 | F2 | Sign in | S2, empty | 3 | enforced | R1, R3 |
-| F3 | Add a location with the form | S3, signed in | 4 | planned | R7, R8 |
-| F4 | See a location's name | S3 with markers | 1 | planned | R9 |
+| F3 | Add a location with the form | S3, signed in | 4 | enforced | R7, R8 |
+| F4 | See a location's name | S3 with markers | 1 | enforced | R9 |
 | F5 | Import locations from a ZIP | S3, signed in | 3 | planned | R10, R11 |
 | F6 | Sign out | S3, signed in | 1 | enforced | R2 |
 | F7 | Open a protected page while signed out, sign in, land on that page | a protected URL | 3 | enforced | R4 |
