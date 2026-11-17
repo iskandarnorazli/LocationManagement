@@ -4,8 +4,9 @@ import { ErrorBody, ImportResponse, LocationsResponse } from '@lm/shared';
 import { strToU8, zipSync } from 'fflate';
 import request from 'supertest';
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
-import { MAX_UPLOAD_BYTES } from '../src/import/routes';
-import { expectBody, resetData, signUp, testApp, testPool } from './helpers';
+import { asUserId } from '../src/auth/userId';
+import { importRows, MAX_UPLOAD_BYTES } from '../src/import/routes';
+import { expectBody, resetData, signUp, testApp, testDeps, testPool } from './helpers';
 
 const pool = testPool();
 
@@ -147,5 +148,22 @@ describe('POST /api/locations/import (R10-R12, D8)', () => {
       const err = expectBody(res, 422, ErrorBody);
       expect(err.error.code, label).toBe(expectedCode);
     }
+  });
+
+  it('rolls back the entire transaction in importRows when row 3 breaks a DB CHECK constraint', async () => {
+    const deps = testDeps(pool);
+    const app = testApp(pool);
+    const { agent, user } = await signUp(app, 'tx@example.com');
+
+    await expect(
+      importRows(deps, asUserId(user.id), [
+        { name: 'Row 1', latitude: 3.1, longitude: 101.6 },
+        { name: 'Row 2', latitude: 3.2, longitude: 101.7 },
+        { name: 'Row 3 Bad', latitude: 91, longitude: 101.8 },
+      ]),
+    ).rejects.toThrow();
+
+    const list = expectBody(await agent.get('/api/locations'), 200, LocationsResponse);
+    expect(list.locations).toEqual([]);
   });
 });

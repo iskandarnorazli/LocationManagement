@@ -1,17 +1,37 @@
 // POST /api/locations/import (docs/API.md, D8). Order: multer (1 MiB) -> readSingleTextFile ->
 // parseLocations -> one transaction with insertMany. Each failure throws the AppError whose code
 // the step returned. Issue #7.
-import type { Location } from '@lm/shared';
+import type { Location, NewLocation } from '@lm/shared';
 import { Router } from 'express';
 import multer from 'multer';
 import type { Deps } from '../deps';
-import { requireAuth, userIdOf } from '../auth';
+import { requireAuth, userIdOf, type UserId } from '../auth';
 import { AppError } from '../http/AppError';
 import { insertMany } from '../locations';
 import { parseLocations } from './parseLocations';
 import { readSingleTextFile } from './readSingleTextFile';
 
 export const MAX_UPLOAD_BYTES = 1024 * 1024;
+
+export async function importRows(
+  deps: Pick<Deps, 'db' | 'ids'>,
+  userId: UserId,
+  rows: ReadonlyArray<NewLocation>,
+): Promise<Location[]> {
+  const rowsWithIds = rows.map((r) => ({ ...r, id: deps.ids.uuid() }));
+  const client = await deps.db.connect();
+  try {
+    await client.query('BEGIN');
+    const locations = await insertMany(client, userId, rowsWithIds);
+    await client.query('COMMIT');
+    return locations;
+  } catch (err) {
+    await client.query('ROLLBACK');
+    throw err;
+  } finally {
+    client.release();
+  }
+}
 
 const upload = multer({
   storage: multer.memoryStorage(),
@@ -65,21 +85,7 @@ export function importRouter(deps: Deps): Router {
       });
     }
 
-    const userId = userIdOf(req);
-    const rowsWithIds = parsed.rows.map((r) => ({ ...r, id: deps.ids.uuid() }));
-    const client = await deps.db.connect();
-    let locations: Location[];
-    try {
-      await client.query('BEGIN');
-      locations = await insertMany(client, userId, rowsWithIds);
-      await client.query('COMMIT');
-    } catch (err) {
-      await client.query('ROLLBACK');
-      throw err;
-    } finally {
-      client.release();
-    }
-
+    const locations = await importRows(deps, userIdOf(req), parsed.rows);
     res.status(201).json({ imported: locations.length, locations });
   });
 

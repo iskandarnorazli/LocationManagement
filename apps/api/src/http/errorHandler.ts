@@ -3,9 +3,8 @@ import type { ErrorRequestHandler, RequestHandler } from 'express';
 import type { ErrorBody } from '@lm/shared';
 import { MulterError } from 'multer';
 import { ZodError } from 'zod';
+import { MAX_UPLOAD_BYTES } from '../import';
 import { AppError } from './AppError';
-
-const MAX_UPLOAD_BYTES = 1024 * 1024;
 
 export const notFound: RequestHandler = () => {
   throw new AppError('NOT_FOUND', 'Not found.');
