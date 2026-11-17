@@ -1,7 +1,8 @@
 // Turns the session cookie into req.userId, or throws UNAUTHENTICATED / TOKEN_EXPIRED. Issue #3.
 import type { RequestHandler } from 'express';
 import type { Deps } from '../deps';
-import { notImplemented } from '../lib/notImplemented';
+import { AppError } from '../http/AppError';
+import { SESSION_COOKIE, verifySession } from './session';
 import type { UserId } from './userId';
 
 declare global {
@@ -14,8 +15,31 @@ declare global {
   }
 }
 
+function readCookie(header: string | undefined, name: string): string | undefined {
+  if (!header) return undefined;
+  const prefix = `${name}=`;
+  for (const part of header.split(';')) {
+    const trimmed = part.trim();
+    if (trimmed.startsWith(prefix)) {
+      return trimmed.slice(prefix.length);
+    }
+  }
+  return undefined;
+}
+
 export function requireAuth(deps: Deps): RequestHandler {
-  return (req) => notImplemented('#3 requireAuth', { deps, req });
+  return async (req, _res, next) => {
+    const token = readCookie(req.headers.cookie, SESSION_COOKIE);
+    const result = await verifySession(token, deps.clock, deps.config.JWT_SECRET);
+    if (!result.ok) {
+      if (result.reason === 'expired') {
+        throw new AppError('TOKEN_EXPIRED', 'Your session has expired.');
+      }
+      throw new AppError('UNAUTHENTICATED', 'Authentication is required.');
+    }
+    req.userId = result.userId;
+    next();
+  };
 }
 
 /** The caller's id inside a handler behind requireAuth. Throws if the middleware did not run. */
