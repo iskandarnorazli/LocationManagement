@@ -10,7 +10,7 @@ The e2e flow specs read their step budgets from the Flows table, and
 | To | Do this |
 |---|---|
 | See every screen as it is on `main` | Open the [`ui-snapshots` branch, `main/latest/`](https://github.com/iskandarnorazli/LocationManagement/tree/ui-snapshots/main/latest) |
-| See what a PR changes | Read the PR's "UI snapshots" comment: before (main) and after, desktop and phone, and a filmstrip per flow. Comment on it. |
+| See what a PR changes | Read the PR's "UI snapshots" comment: before (main) and after, desktop and phone, a filmstrip per flow, and a video of each flow (an inline GIF with a link to the full recording). Comment on it. |
 | See a screen on any issue, now | Actions, "UI snapshots", Run workflow: the issue number and the state or flow ids (empty means all). The images arrive as a comment. |
 | Report a bug | New issue, "Bug": where (a state or flow id below), steps, expected, actual, a screenshot. |
 | Propose a UX change | New issue, "UX feedback", or edit the tables below in a PR. A budget you lower fails the flow's spec until the UI meets it. |

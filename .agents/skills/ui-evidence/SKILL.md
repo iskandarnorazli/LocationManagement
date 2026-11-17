@@ -16,6 +16,7 @@ F5) come from `docs/UX_FLOWS.md`; use them in titles, comments and commit messag
 | Every built state, desktop and phone | `SNAP_DIR=snapshots npm run snapshots` (PowerShell: `$env:SNAP_DIR="snapshots"; npm run snapshots`) |
 | Some states or flows only | add `SNAP_ONLY=S3.markers,F3` |
 | Flow filmstrips | `SNAP_DIR=snapshots npm run e2e`: each flow spec saves an image per step |
+| Flow videos | the same run records each flow spec (`F<n>: ...` titles) to `SNAP_DIR/videos/<Flow>.webm`; the workflow adds a GIF and the comment shows it |
 
 Files land in `snapshots/screens/<state>--<viewport>.png` and `snapshots/flows/<Flow>/`. The
 folder is git-ignored; never commit screenshots to a feature branch.
