@@ -1,4 +1,4 @@
-import { UserResponse } from '@lm/shared';
+import { UserResponse, type Credentials } from '@lm/shared';
 import { create } from 'zustand';
 import { api, ApiError, setOnUnauthorized } from '../api/client';
 import { initialSession, sessionReducer, type SessionEvent, type SessionState } from './sessionMachine';
@@ -7,7 +7,30 @@ type SessionStore = {
   state: SessionState;
   dispatch: (event: SessionEvent) => void;
   checkSession: () => Promise<void>;
+  register: (credentials: Credentials) => Promise<void>;
+  login: (credentials: Credentials) => Promise<void>;
 };
+
+async function submitAuth(
+  dispatch: (event: SessionEvent) => void,
+  startEvent: 'REGISTER' | 'LOGIN',
+  path: '/auth/register' | '/auth/login',
+  credentials: Credentials,
+): Promise<void> {
+  dispatch({ type: startEvent });
+  try {
+    const { user } = await api(path, {
+      method: 'POST',
+      body: JSON.stringify(credentials),
+      schema: UserResponse,
+    });
+    dispatch({ type: 'AUTH_OK', user });
+  } catch (err) {
+    const apiErr =
+      err instanceof ApiError ? err : new ApiError(0, 'NETWORK', 'Network error. Please try again.');
+    dispatch({ type: 'AUTH_FAILED', error: apiErr });
+  }
+}
 
 export const useSessionStore = create<SessionStore>((set, get) => ({
   state: initialSession,
@@ -26,6 +49,8 @@ export const useSessionStore = create<SessionStore>((set, get) => ({
       get().dispatch({ type: 'NETWORK', error: apiErr });
     }
   },
+  register: (credentials) => submitAuth(get().dispatch, 'REGISTER', '/auth/register', credentials),
+  login: (credentials) => submitAuth(get().dispatch, 'LOGIN', '/auth/login', credentials),
 }));
 
 setOnUnauthorized(() => {
