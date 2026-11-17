@@ -26,8 +26,12 @@ export const SCREENS: ScreenState[] = [
   { id: 'S3.markers', status: 'planned' },
   { id: 'S3.popup', status: 'planned' },
   { id: 'S3.invalid', status: 'planned' },
+  { id: 'S3.nav', status: 'planned' },
+  { id: 'S3.sheetOpen', status: 'planned' },
+  { id: 'S3.focus', status: 'planned' },
   { id: 'S4.idle', status: 'planned' },
   { id: 'S4.chosen', status: 'planned' },
   { id: 'S4.success', status: 'planned' },
   { id: 'S4.error', status: 'planned' },
+  { id: 'S4.afterStay', status: 'planned' },
 ];

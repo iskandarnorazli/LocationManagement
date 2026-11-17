@@ -7,8 +7,8 @@ a milestone. Issues are written to the `issue-writing` skill.
 |---|---|---|
 | M0 Infra | CI green on Ubuntu and Windows with the scaffold; lockfile committed; labels, templates, agent rules in place | This bootstrap |
 | M1 Backend | Every endpoint in `API.md` works with the errors in `ERRORS.md`; isolation and import tests green | Needs D6 and D9 decided first |
-| M2 Frontend design | Two or three competing prototypes of the map and upload screens compared with the owner; D13 decided; a chosen layout | Owner session: explore the design space before building |
-| M3 Frontend build | The four pages, sidebar, protected routes, map, form, upload popups; e2e green | Built against the chosen M2 design |
+| M2 Frontend design | Two or three competing prototypes of the map and upload screens compared with the owner; D13 decided; a chosen layout | Done 2026-11-17: four prototypes on PR #67; layout D (D23) and D13 decided |
+| M3 Frontend build | The four pages, sidebar, protected routes, map, form, upload popups; e2e green | Built against layout D (D23): #71 shell, #72 auth pages, #73 map page, #74 upload page |
 | M4 Delivery | README with setup and usage, Docker compose for the whole stack, every R row in `REQUIREMENTS.md` names its proof | |
 
 Order inside M1: shared schemas and error codes, then config and the error middleware, then
