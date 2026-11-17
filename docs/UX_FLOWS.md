@@ -49,7 +49,6 @@ its rows to `built` and adds the setup in `e2e/screens.ts`.
 
 | State | Screen | What it shows | Status |
 |---|---|---|---|
-| S0.home | Placeholder | The scaffold's home page (removed when S2 is built) | built |
 | S1.empty | Register | Empty form | built |
 | S1.invalid | Register | Field errors after submitting an invalid email and a short password | built |
 | S1.taken | Register | "An account with this email already exists." | built |
@@ -59,7 +58,7 @@ its rows to `built` and adds the setup in `e2e/screens.ts`.
 | S3.markers | Map | Three markers in Kuala Lumpur | planned |
 | S3.popup | Map | A marker's popup showing its name (R9) | planned |
 | S3.invalid | Map | The form with latitude 91: field error, nothing sent | planned |
-| S3.nav | Map | Phone: the sidebar drawer open over the map (R2, D23) | planned |
+| S3.nav | Map | Phone: the sidebar drawer open over the map (R2, D23) | built |
 | S3.sheetOpen | Map | The sheet swiped up: the form and "Your locations (3)" (D23) | planned |
 | S3.focus | Map | Opened from "See them on the map": zoomed to the new markers, sheet open, new rows highlighted (D13) | planned |
 | S4.idle | Upload | No file chosen | planned |
@@ -80,7 +79,7 @@ exists and fails CI over budget; `planned` means its pages are not built yet.
 | F3 | Add a location with the form | S3, signed in | 4 | planned | R7, R8 |
 | F4 | See a location's name | S3 with markers | 1 | planned | R9 |
 | F5 | Import locations from a ZIP | S3, signed in | 3 | planned | R10, R11 |
-| F6 | Sign out | S3, signed in | 1 | planned | R2 |
+| F6 | Sign out | S3, signed in | 1 | enforced | R2 |
 | F7 | Open a protected page while signed out, sign in, land on that page | a protected URL | 3 | enforced | R4 |
 
 Why these budgets: F1 and F2 are two fields and a button. F3 is three fields and a button; a

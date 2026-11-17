@@ -16,14 +16,32 @@ type LocationsStore = {
   reset: () => void;
 };
 
-export const useLocationsStore = create<LocationsStore>((set) => ({
+let loadSeq = 0;
+
+function mergeLocations(server: Location[], current: Location[]): Location[] {
+  const seen = new Set(server.map((loc) => loc.id));
+  const extra = current.filter((loc) => !seen.has(loc.id));
+  return [...server, ...extra];
+}
+
+export const useLocationsStore = create<LocationsStore>((set, get) => ({
   state: { kind: 'idle' },
   load: async () => {
+    const seq = ++loadSeq;
     set({ state: { kind: 'loading' } });
     try {
       const { locations } = await api('/locations', { schema: LocationsResponse });
-      set({ state: { kind: 'ready', locations } });
+      set((s) => {
+        if (seq !== loadSeq) {
+          if (s.state.kind === 'ready') {
+            return { state: { kind: 'ready', locations: mergeLocations(locations, s.state.locations) } };
+          }
+          return s;
+        }
+        return { state: { kind: 'ready', locations } };
+      });
     } catch (err) {
+      if (seq !== loadSeq) return;
       const error =
         err instanceof ApiError ? err : new ApiError(0, 'NETWORK', 'Network error. Please try again.');
       set({ state: { kind: 'failed', error } });
@@ -35,18 +53,26 @@ export const useLocationsStore = create<LocationsStore>((set) => ({
       body: JSON.stringify(input),
       schema: LocationResponse,
     });
-    set((s) => ({
-      state: {
-        kind: 'ready',
-        locations: s.state.kind === 'ready' ? [...s.state.locations, location] : [location],
-      },
-    }));
+    if (get().state.kind === 'ready') {
+      set((s) => ({
+        state: {
+          kind: 'ready',
+          locations: s.state.kind === 'ready' ? [...s.state.locations, location] : [location],
+        },
+      }));
+    } else {
+      await get().load();
+    }
     return location;
   },
-  addMany: (locations) =>
+  addMany: (locations) => {
+    if (get().state.kind !== 'ready') {
+      void get().load();
+      return;
+    }
     set((s) => {
-      const existing = s.state.kind === 'ready' ? s.state.locations : [];
-      const seen = new Set(existing.map((loc) => loc.id));
+      if (s.state.kind !== 'ready') return s;
+      const seen = new Set(s.state.locations.map((loc) => loc.id));
       const added: Location[] = [];
       for (const loc of locations) {
         if (!seen.has(loc.id)) {
@@ -54,7 +80,11 @@ export const useLocationsStore = create<LocationsStore>((set) => ({
           added.push(loc);
         }
       }
-      return { state: { kind: 'ready', locations: [...existing, ...added] } };
-    }),
-  reset: () => set({ state: { kind: 'idle' } }),
+      return { state: { kind: 'ready', locations: [...s.state.locations, ...added] } };
+    });
+  },
+  reset: () => {
+    loadSeq += 1;
+    set({ state: { kind: 'idle' } });
+  },
 }));

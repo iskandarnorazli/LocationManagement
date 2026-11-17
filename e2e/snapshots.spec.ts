@@ -1,7 +1,7 @@
 // Captures every built screen state at each viewport into SNAP_DIR/screens/
 // (<state>--<viewport>.png); SNAP_DIR defaults to ./snapshots. Run: npm run snapshots
 import path from 'node:path';
-import { test } from '@playwright/test';
+import { test } from './test';
 import { SCREENS } from './screens';
 import { SNAP_DIR, VIEWPORTS, wanted } from './ux';
 

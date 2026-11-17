@@ -6,6 +6,9 @@ import { defineConfig } from '@playwright/test';
 // - snapshots: one screenshot per built screen state (e2e/screens.ts) per viewport
 export default defineConfig({
   testDir: 'e2e',
+  // D24 (#86): one pool user per run, and a check that the run stays inside D21's auth budget.
+  globalSetup: './e2e/global-setup.ts',
+  globalTeardown: './e2e/global-teardown.ts',
   use: { baseURL: 'http://localhost:5173', trace: 'retain-on-failure' },
   projects: [
     { name: 'e2e', testIgnore: /snapshots\.spec\.ts/ },
