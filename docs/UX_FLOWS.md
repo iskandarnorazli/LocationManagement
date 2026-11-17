@@ -32,14 +32,14 @@ flowchart LR
   S1 -- "link: have an account" --> S2
   S2 -- "link: new here" --> S1
   S3 -- "sidebar: Upload" --> S4[S4 Upload]
-  S4 -- "sidebar: Map, or after the success popup (D13)" --> S3
+  S4 -- "sidebar: Map, or the link See them on the map (D13)" --> S3
   S3 -- "sidebar: Logout" --> S2
   S4 -- "sidebar: Logout" --> S2
   X[any protected URL, signed out] -- "redirect, then back after login" --> S2
 ```
 
-The layout (where the sidebar and form sit) is decided in the design session (#11); the map
-holds for any layout.
+The layout is D23 (layout D): a full-screen map with the form in a bottom sheet that swipes up
+to the list, and an upload page with the list beside it. Screenshots are in `docs/design/`.
 
 ## Screens
 
@@ -59,10 +59,14 @@ its rows to `built` and adds the setup in `e2e/screens.ts`.
 | S3.markers | Map | Three markers in Kuala Lumpur | planned |
 | S3.popup | Map | A marker's popup showing its name (R9) | planned |
 | S3.invalid | Map | The form with latitude 91: field error, nothing sent | planned |
+| S3.nav | Map | Phone: the sidebar drawer open over the map (R2, D23) | planned |
+| S3.sheetOpen | Map | The sheet swiped up: the form and "Your locations (3)" (D23) | planned |
+| S3.focus | Map | Opened from "See them on the map": zoomed to the new markers, sheet open, new rows highlighted (D13) | planned |
 | S4.idle | Upload | No file chosen | planned |
 | S4.chosen | Upload | A file chosen, ready to send | planned |
 | S4.success | Upload | The success popup (R11) | planned |
 | S4.error | Upload | The error popup for a ZIP with two files (R12) | planned |
+| S4.afterStay | Upload | After the success popup: the new rows highlighted in the list, with the link to the map (D13) | planned |
 
 ## Flows
 
