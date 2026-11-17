@@ -1,7 +1,6 @@
 // docs/STATE_MACHINES.md "Location form". Issue #10 fills the reducer.
-import type { Location } from '@lm/shared';
+import { NewLocation, type Location } from '@lm/shared';
 import type { Transition } from '../lib/machine';
-import { notImplemented } from '../lib/notImplemented';
 import type { ApiError } from '../api/client';
 
 /** What the user typed; numbers stay strings until NewLocation parses them on SUBMIT. */
@@ -38,6 +37,50 @@ export const emptyForm: FormState = {
   saveError: null,
 };
 
+function toNumber(raw: string): number {
+  return raw.trim().length === 0 ? Number.NaN : Number(raw);
+}
+
 export function formReducer(state: FormState, event: FormEvent): FormState {
-  return notImplemented('#10 formReducer', { state, event });
+  switch (state.kind) {
+    case 'editing': {
+      if (event.type === 'EDIT') {
+        const errors: FieldErrors = { ...state.errors };
+        delete errors[event.field];
+        return {
+          kind: 'editing',
+          fields: { ...state.fields, [event.field]: event.value },
+          errors,
+          saveError: null,
+        };
+      }
+      if (event.type === 'SUBMIT') {
+        const parsed = NewLocation.safeParse({
+          name: state.fields.name,
+          latitude: toNumber(state.fields.latitude),
+          longitude: toNumber(state.fields.longitude),
+        });
+        if (!parsed.success) {
+          const errors: FieldErrors = {};
+          for (const issue of parsed.error.issues) {
+            const key = issue.path[0];
+            if (key === 'name' || key === 'latitude' || key === 'longitude') {
+              errors[key] ??= issue.message;
+            }
+          }
+          return { kind: 'editing', fields: state.fields, errors, saveError: null };
+        }
+        return { kind: 'saving', fields: state.fields };
+      }
+      return state;
+    }
+
+    case 'saving': {
+      if (event.type === 'SAVE_OK') return emptyForm;
+      if (event.type === 'SAVE_ERROR') {
+        return { kind: 'editing', fields: state.fields, errors: {}, saveError: event.error };
+      }
+      return state;
+    }
+  }
 }
