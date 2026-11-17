@@ -12,14 +12,14 @@ Add them one at a time with a form, or many at once by uploading a ZIP that hold
 | Part | Choice |
 |---|---|
 | Web | React (Vite), TypeScript, Tailwind CSS, react-router, Zustand, react-leaflet |
-| API | Node.js 22, Express 5, TypeScript |
+| API | Node.js 26, Express 5, TypeScript |
 | Database | PostgreSQL 16 |
 | Auth | JWT |
 | Tests | Vitest, supertest, Playwright |
 
 ## Run it locally
 
-Needs Node.js 22 and Docker. On Windows, use PowerShell; every command below works there too.
+Needs Node.js 26 and Docker. On Windows, use PowerShell; every command below works there too.
 
 ```sh
 npm ci

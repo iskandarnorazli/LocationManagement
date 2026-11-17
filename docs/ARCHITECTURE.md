@@ -28,7 +28,7 @@ flowchart LR
 
 | Id | Decision | Status |
 |---|---|---|
-| D1 | TypeScript everywhere. Web: Vite + React, Tailwind, react-router, Zustand, react-leaflet. API: Node 22, Express 5. Database: PostgreSQL 16. | decided (owner, 2026-11-16) |
+| D1 | TypeScript everywhere. Web: Vite + React, Tailwind, react-router, Zustand, react-leaflet. API: Node 26, Express 5. Database: PostgreSQL 16. | decided (owner, 2026-11-16) |
 | D2 | One repository, npm workspaces: `apps/api`, `apps/web`, `packages/shared`. | proposed |
 | D3 | CI like Awanfs: Ubuntu and Windows, real Postgres in tests, e2e, Docker image. No formal verification: nothing here is concurrent or a protocol worth a model. | decided (owner, 2026-11-16) |
 | D4 | Data access with `pg` and plain SQL; migrations are numbered `.sql` files run by a 40-line runner in `apps/api/src/db/migrate.ts`. | proposed |
