@@ -1,10 +1,12 @@
 import type { Location } from '@lm/shared';
-import { fireEvent, render, screen, within } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen, within } from '@testing-library/react';
 import { MemoryRouter } from 'react-router';
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { ApiError } from '../api/client';
 import { useLocationsStore } from '../map/locationsStore';
 import { MapPage } from './MapPage';
+
+afterEach(cleanup);
 
 // jsdom cannot lay out a Leaflet map: the real map is covered by e2e (map.spec.ts, F3, F4).
 vi.mock('../map/LocationsMap', () => ({

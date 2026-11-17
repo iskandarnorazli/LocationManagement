@@ -1,7 +1,9 @@
-import { fireEvent, render, screen } from '@testing-library/react';
+import { cleanup, fireEvent, render, screen } from '@testing-library/react';
 import { useState } from 'react';
-import { describe, expect, it } from 'vitest';
+import { afterEach, describe, expect, it } from 'vitest';
 import { LocationSheet, sheetGesture } from './LocationSheet';
+
+afterEach(cleanup);
 
 function Harness({ initiallyOpen = false }: { initiallyOpen?: boolean }) {
   const [open, setOpen] = useState(initiallyOpen);
