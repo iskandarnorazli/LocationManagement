@@ -1,16 +1,14 @@
-// The README's demo (#13): the whole app in one take, recorded only by the UI snapshots workflow
-// (SNAP_DIR set). e2e/test.ts saves the video to SNAP_DIR/videos/Demo.webm and the workflow makes
-// Demo.gif; both are copied to docs/ when a screen changes. Never edit the recording by hand.
+// The README's demo (#13): the whole app in one take. Its own Playwright project (`demo`), run only
+// by the UI snapshots workflow with SNAP_DIR set: e2e/test.ts saves the video to
+// SNAP_DIR/videos/Demo.webm and the workflow makes Demo.gif and the lighter Demo-readme.gif. Both
+// are copied to docs/ when a screen changes. Never edit the recording by hand.
 // Budget (D24): one real registration, the new user's; everything else is signed in already.
-import { SNAP_DIR } from './ux';
 import { POOL_PASSWORD } from './auth';
 import { expect, test } from './test';
 import { SAMPLE_ZIP } from './uploads';
 
 // Pauses let a viewer follow the recording; nothing asserts on time.
 const beat = (page: import('@playwright/test').Page, ms = 900) => page.waitForTimeout(ms);
-
-test.skip(SNAP_DIR === null, 'recorded only by the UI snapshots workflow');
 
 test('Demo: register, add a location, open it, see the list, upload a ZIP, log out', async ({ page }) => {
   test.setTimeout(90_000);
