@@ -16,6 +16,8 @@ export const test = base.extend({
     const flow = /^(F\d+):/.exec(testInfo.title)?.[1];
     const video = page.video();
     if (SNAP_DIR && flow && wanted(flow) && video) {
+      // Let the recording catch the flow's end state before it stops (only when recording).
+      await page.waitForTimeout(700);
       await page.close();
       await video.saveAs(path.join(SNAP_DIR, 'videos', `${flow}.webm`));
     }
