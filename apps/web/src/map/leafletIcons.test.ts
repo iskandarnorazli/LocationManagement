@@ -26,4 +26,25 @@ describe('leafletIcons', () => {
     expect(L.Icon.Default.prototype.options.iconRetinaUrl).toBe(first.iconRetinaUrl);
     expect(L.Icon.Default.prototype.options.shadowUrl).toBe(first.shadowUrl);
   });
+
+  it('uses the imported asset URLs even when Leaflet detects a non-empty imagePath', async () => {
+    // Cast through unknown because _detectIconPath is a private method not in Leaflet's public types.
+    const spy = vi
+      .spyOn(
+        L.Icon.Default.prototype as unknown as { _detectIconPath: () => string },
+        '_detectIconPath',
+      )
+      .mockReturnValue('/leaflet/dist/images/');
+    try {
+      L.Icon.Default.imagePath = undefined;
+      vi.resetModules();
+      await import('./leafletIcons');
+
+      const icon = new L.Icon.Default();
+      expect(icon.createIcon().getAttribute('src')).toBe(iconUrl);
+      expect(icon.createShadow()?.getAttribute('src')).toBe(shadowUrl);
+    } finally {
+      spy.mockRestore();
+    }
+  });
 });
