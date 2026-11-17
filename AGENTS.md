@@ -111,4 +111,5 @@ Postgres for local tests: `docker compose up -d db`, then
 - **The sample file has a header row and spaces after commas** (`Name, Latitude, Longitude`). The parser rules are D10.
 - **Windows runners have no service containers.** CI's Windows job starts the preinstalled PostgreSQL instead (see `.github/workflows/ci.yml`).
 - **`workflow_dispatch` only finds workflows on `main`.** A new workflow file runs by dispatch only after it is merged.
+- **e2e shares one IP, so it shares D21's auth budget** (5 registrations, 10 logins a minute). A spec that needs a signed-in user calls `signInAs(page)` from `e2e/auth.ts`; specs import `test` from `e2e/test.ts`. Never call `/api/auth/` from a spec: setup refuses it, and teardown fails a run over budget (D24).
 - **Stage files by name**, never `git add -A`: `.env` files hold secrets and are git-ignored, keep it that way.

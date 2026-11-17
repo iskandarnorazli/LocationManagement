@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from './test';
 
 test('the web app loads and the API behind its proxy is ready', async ({ page, request }) => {
   await page.goto('/');

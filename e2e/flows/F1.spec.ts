@@ -1,4 +1,4 @@
-import { expect, test } from '@playwright/test';
+import { expect, test } from '../test';
 import { startFlow } from './flow';
 
 test('F1: create an account within budget', async ({ page }) => {

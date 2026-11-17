@@ -1,6 +1,7 @@
 // One entry per row of the Screens table in docs/UX_FLOWS.md (check-ux.mjs keeps them equal).
 // A built state has `open`, which brings a fresh page to exactly that state with fixed data.
 import type { Page } from '@playwright/test';
+import { poolEmail, POOL_PASSWORD, signInAs } from './auth';
 
 export type ScreenState = {
   id: string;
@@ -32,14 +33,10 @@ export const SCREENS: ScreenState[] = [
     id: 'S1.taken',
     status: 'built',
     open: async (page) => {
-      const email = `taken-${Date.now()}@example.com`;
-      await page.request.post('/api/auth/register', {
-        data: { email, password: 'password123' },
-      });
-      await page.context().clearCookies();
+      // The pool user's email is already taken (D24): no extra registration.
       await page.goto('/register');
-      await page.getByLabel('Email').fill(email);
-      await page.getByLabel('Password').fill('password123');
+      await page.getByLabel('Email').fill(poolEmail());
+      await page.getByLabel('Password').fill(POOL_PASSWORD);
       await page.getByRole('button', { name: 'Create account' }).click();
       await page.getByRole('alert').waitFor();
     },
@@ -71,10 +68,7 @@ export const SCREENS: ScreenState[] = [
     id: 'S3.nav',
     status: 'built',
     open: async (page) => {
-      const email = `nav-${Date.now()}@example.com`;
-      await page.request.post('/api/auth/register', {
-        data: { email, password: 'password123' },
-      });
+      await signInAs(page);
       await page.goto('/map');
       await page.getByRole('heading', { name: 'Map' }).waitFor();
       const menuButton = page.getByRole('button', { name: 'Open menu' });
