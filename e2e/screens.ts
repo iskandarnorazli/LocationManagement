@@ -1,6 +1,7 @@
 // One entry per row of the Screens table in docs/UX_FLOWS.md (check-ux.mjs keeps them equal).
 // A built state has `open`, which brings a fresh page to exactly that state with fixed data.
 import type { Page } from '@playwright/test';
+import { PROTO_SCREENS } from './protoScreens';
 
 export type ScreenState = {
   id: string;
@@ -30,4 +31,5 @@ export const SCREENS: ScreenState[] = [
   { id: 'S4.chosen', status: 'planned' },
   { id: 'S4.success', status: 'planned' },
   { id: 'S4.error', status: 'planned' },
+  ...PROTO_SCREENS,
 ];
