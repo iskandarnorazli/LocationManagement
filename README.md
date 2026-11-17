@@ -4,6 +4,11 @@ A web app where each signed-in user keeps their own locations on an interactive 
 a form, or many at once by uploading a ZIP that holds one text file of names and coordinates. Every
 user sees only their own markers.
 
+![Demo: create an account, add a location, open it, swipe up to the list, upload a ZIP, see the new row on the map, log out](docs/demo.gif)
+
+The demo above is recorded by [e2e/demo.spec.ts](e2e/demo.spec.ts) on every UI change, not by
+hand. Full resolution: [docs/demo.webm](docs/demo.webm).
+
 ## Try it: one command
 
 Needs [Docker](https://docs.docker.com/get-docker/) (Docker Desktop on Windows or macOS). The same
@@ -28,6 +33,14 @@ Three containers start: `db` (PostgreSQL 16), `api` (the Express API, also on po
 | **Map** | Your markers on a map of the world. Click a marker to see its name. Add a location with the form at the bottom: a name, a latitude (-90 to 90) and a longitude (-180 to 180). It appears at once, no reload. Swipe the sheet up, or tap its handle, to see the list of your locations. |
 | **Upload** | Choose a ZIP and press Upload. A popup confirms for three seconds; then the new rows are highlighted in your list, with a link that opens the map on them. If the ZIP is not acceptable, a popup says why for three seconds and nothing is added. |
 | **Sidebar** | Map, Upload, your email, and Log out. On a phone it opens from the menu button. |
+
+| Map, desktop | The list, phone | Upload, after a ZIP |
+|---|---|---|
+| ![Markers in Kuala Lumpur with the add form at the bottom](docs/screenshots/map-desktop.jpg) | ![The sheet swiped up: the form and the list](docs/screenshots/list-phone.jpg) | ![Three new rows highlighted with a link to the map](docs/screenshots/upload-desktop.jpg) |
+
+| A marker's name | An upload refused |
+|---|---|
+| ![A popup with the location's name](docs/screenshots/popup-desktop.jpg) | ![The popup naming the two files the ZIP holds](docs/screenshots/upload-error-phone.jpg) |
 
 ### What the ZIP may hold
 
