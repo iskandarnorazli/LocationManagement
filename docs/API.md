@@ -15,13 +15,15 @@ curl: `curl -c jar -b jar ...`.
 |---|---|---|---|---|
 | `GET /health/live` | none | | `200 {"status":"ok"}` | |
 | `GET /health/ready` | none | | `200 {"status":"ok"}` once Postgres answers | `503 UNAVAILABLE` |
-| `POST /api/auth/register` | none | `Credentials` | `201 {user}` and a credential (the new user is signed in) | `400 VALIDATION_FAILED`, `409 EMAIL_TAKEN` |
-| `POST /api/auth/login` | none | `Credentials` | `200 {user}` and a credential | `400 VALIDATION_FAILED`, `401 INVALID_CREDENTIALS` |
+| `POST /api/auth/register` | none | `Credentials` | `201 {user}` and a credential (the new user is signed in) | `400 VALIDATION_FAILED`, `409 EMAIL_TAKEN`, `429 RATE_LIMITED` |
+| `POST /api/auth/login` | none | `Credentials` | `200 {user}` and a credential | `400 VALIDATION_FAILED`, `401 INVALID_CREDENTIALS`, `429 RATE_LIMITED` |
 | `POST /api/auth/logout` | credential | | `204`, the cookie is cleared | |
 | `GET /api/auth/me` | credential | | `200 {user}` | `401 UNAUTHENTICATED` |
 | `GET /api/locations` | credential | | `200 {locations: Location[]}`, oldest first | `401 UNAUTHENTICATED` |
 | `POST /api/locations` | credential | `NewLocation` | `201 {location}` | `400 VALIDATION_FAILED`, `401` |
-| `POST /api/locations/import` | credential | `multipart/form-data`, field `file`: one `.zip`, at most 1 MiB | `201 {imported: n, locations: Location[]}` (only the new ones) | `400 VALIDATION_FAILED` (no file field), `401`, `413 PAYLOAD_TOO_LARGE`, `422 ZIP_*`, `422 FILE_*` |
+| `POST /api/locations/import` | credential | `multipart/form-data`, field `file`: one `.zip`, at most 1 MiB | `201 {imported: n, locations: Location[]}` (only the new ones) | `400 VALIDATION_FAILED` (no file field), `401`, `413 PAYLOAD_TOO_LARGE`, `422 ZIP_*`, `422 FILE_*`, `429 RATE_LIMITED` |
+
+A `429 RATE_LIMITED` answer carries `Retry-After` (seconds) and `details.retryAfterSeconds`; the limits are D21.
 
 Every `/api/*` route that needs a credential answers `401 UNAUTHENTICATED` without one, and
 `401 TOKEN_EXPIRED` when it has expired. An unknown route answers `404 NOT_FOUND`.

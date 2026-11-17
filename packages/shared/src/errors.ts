@@ -16,6 +16,7 @@ export const ERROR_CODES = {
   ZIP_NOT_TEXT: 422,
   FILE_EMPTY: 422,
   FILE_ROWS_INVALID: 422,
+  RATE_LIMITED: 429,
   UNAVAILABLE: 503,
   INTERNAL: 500,
 } as const satisfies Record<string, number>;

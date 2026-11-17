@@ -3,3 +3,6 @@ ts	phase	decision	why	evidence	result
 2026-11-16T13:17:40Z	plan	playbook none	process and tooling; the restore commit first		
 2026-11-16T13:17:45Z	build	phase plan -> build	owner asked		build
 2026-11-16T13:20:25Z	build	guard flags by diff; owner label overrides	a written rule alone did not stop weakening in awan-lang audits; a check the builder cannot satisfy alone does	negative controls below	Test guard workflow
+2026-11-17T03:50:30Z	verify	phase build -> verify	done		verify
+2026-11-17T03:50:30Z	review	phase verify -> review	merged	#17	review
+2026-11-17T03:50:30Z	review	handoff claude -> human for review	none: merged		handed off

@@ -1,0 +1,4 @@
+ts	phase	decision	why	evidence	result
+2026-11-17T03:49:02Z	plan	opened task security-limits	No size or count from a client is trusted: every upload and auth path has a hard limit, floods get 429, and native dependencies stay patched		open
+2026-11-17T03:49:02Z	plan	playbook feature: 8 steps copied	matched to the task	/root/.claude/plugins/synced/0b5bae93-7c1e-4f6a-91df-e84ca7730170_4b176d38-8512-4ae7-a7a7-9c0a94655468/pstack/skills/poteto-mode/playbooks/feature.md	
+2026-11-17T03:49:02Z	build	phase plan -> build	owner decided		build
