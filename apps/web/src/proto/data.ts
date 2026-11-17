@@ -17,6 +17,7 @@ export const USER_EMAIL = 'aisyah@example.com';
 
 export type ProtoState =
   | 'markers'
+  | 'sheetOpen'
   | 'popup'
   | 'invalid'
   | 'nav'
@@ -26,4 +27,4 @@ export type ProtoState =
   | 'error'
   | 'afterStay';
 
-export const MAP_STATES: ProtoState[] = ['markers', 'popup', 'invalid', 'nav', 'afterMap'];
+export const MAP_STATES: ProtoState[] = ['markers', 'sheetOpen', 'popup', 'invalid', 'nav', 'afterMap'];

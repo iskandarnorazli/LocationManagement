@@ -84,6 +84,55 @@ export function PhoneBar({ title, open, page }: { title: string; open: boolean; 
   );
 }
 
+/** One row on desktop (name, latitude, longitude, Add), stacked on a phone: layout D's sheet. */
+export function LocationFormRow({ invalid }: { invalid: boolean }) {
+  const label = 'block text-xs font-medium text-slate-700';
+  return (
+    <form
+      className="grid grid-cols-2 gap-3 md:grid-cols-[2fr_1fr_1fr_auto] md:items-start"
+      onSubmit={(e) => e.preventDefault()}
+      noValidate
+    >
+      <div className="col-span-2 md:col-span-1">
+        <label className={label} htmlFor="name">
+          Name
+        </label>
+        <input id="name" className={`${field} border-slate-300`} defaultValue={invalid ? 'Menara KL' : ''} />
+      </div>
+      <div>
+        <label className={label} htmlFor="lat">
+          Latitude
+        </label>
+        <input
+          id="lat"
+          inputMode="decimal"
+          aria-invalid={invalid}
+          aria-describedby={invalid ? 'lat-error' : undefined}
+          className={`${field} ${invalid ? 'border-red-500 bg-red-50' : 'border-slate-300'}`}
+          defaultValue={invalid ? '91' : ''}
+        />
+        {invalid && (
+          <p id="lat-error" className="mt-1 text-xs text-red-700">
+            Latitude must be between -90 and 90.
+          </p>
+        )}
+      </div>
+      <div>
+        <label className={label} htmlFor="lng">
+          Longitude
+        </label>
+        <input id="lng" inputMode="decimal" className={`${field} border-slate-300`} defaultValue={invalid ? '101.7038' : ''} />
+      </div>
+      <button
+        type="submit"
+        className="col-span-2 h-[38px] rounded-md bg-emerald-700 px-5 text-sm font-semibold text-white hover:bg-emerald-800 md:col-span-1 md:mt-5"
+      >
+        Add
+      </button>
+    </form>
+  );
+}
+
 export function LocationForm({ invalid, onDark = false }: { invalid: boolean; onDark?: boolean }) {
   const label = `block text-sm font-medium ${onDark ? 'text-white' : 'text-slate-700'}`;
   return (

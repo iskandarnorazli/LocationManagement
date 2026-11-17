@@ -3,9 +3,11 @@
 // C one centred column, the same on phone and desktop.
 import { IMPORTED, MAP_STATES, SAVED, type ProtoLocation, type ProtoState } from './data';
 import { ProtoMap } from './ProtoMap';
+import { Sheet } from './Sheet';
 import {
   Card,
   LocationForm,
+  LocationFormRow,
   LocationList,
   LogOut,
   NavLinks,
@@ -188,6 +190,61 @@ export function LayoutC({ v }: { v: View }) {
           )}
         </div>
       </main>
+      <Popups v={v} />
+    </div>
+  );
+}
+
+/**
+ * D, the owner's pick (2026-11-17): A's full-screen map and dark sidebar; the add form in a sheet at
+ * the bottom centre that swipes up to reveal the list; B's upload page (upload beside the list).
+ * D13 read as: stay on the upload page with the new rows highlighted (afterStay), and the link
+ * opens the map fitted to them with the sheet open (afterMap).
+ */
+export function LayoutD({ v }: { v: View }) {
+  const phone = window.innerWidth < 768;
+  const sheetOpen = v.state === 'sheetOpen' || v.state === 'afterMap';
+  const below = phone ? (sheetOpen ? 560 : 330) : sheetOpen ? 520 : 170;
+  const pad = { topLeft: [48, 48] as [number, number], bottomRight: [48, below] as [number, number] };
+  const highlight = v.state === 'afterMap' || v.state === 'afterStay' ? NEW_IDS : [];
+  return (
+    <div className="flex h-screen flex-col bg-slate-100 md:flex-row">
+      <aside className="hidden w-60 shrink-0 flex-col justify-between bg-slate-900 p-4 md:flex">
+        <div>
+          <Brand dark />
+          <NavLinks page={v.page} tone="dark" />
+        </div>
+        <LogOut tone="dark" />
+      </aside>
+      <PhoneBar title={v.page === 'map' ? 'Map' : 'Upload'} open={v.navOpen} page={v.page} />
+      {v.page === 'map' ? (
+        <main className="relative min-h-0 flex-1">
+          <ProtoMap locations={v.locations} fit={v.fit} popupId={v.popupId} pad={pad} />
+          {v.state === 'afterMap' && <Toast>3 new locations from kl-places.zip</Toast>}
+          <div className="pointer-events-none absolute inset-0 z-[1000] md:px-4">
+            <div className="pointer-events-auto">
+              <Sheet
+                initiallyOpen={sheetOpen}
+                count={v.locations.length}
+                form={<LocationFormRow invalid={v.invalid} />}
+                list={<LocationList locations={v.locations} highlight={highlight} />}
+              />
+            </div>
+          </div>
+        </main>
+      ) : (
+        <main className="min-h-0 flex-1 overflow-auto p-4 md:p-8">
+          <div className="grid gap-4 md:grid-cols-2">
+            <Card title="Import locations from a ZIP">
+              {v.state === 'afterStay' && <StayedBanner />}
+              <UploadPanel chosen={v.chosen} />
+            </Card>
+            <Card title={`Your locations (${v.locations.length})`}>
+              <LocationList locations={v.locations} highlight={highlight} />
+            </Card>
+          </div>
+        </main>
+      )}
       <Popups v={v} />
     </div>
   );

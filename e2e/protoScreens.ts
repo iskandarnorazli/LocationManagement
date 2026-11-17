@@ -2,8 +2,9 @@
 // Ids are <state>.<layout>, so the snapshot comment lists A, B and C of each state together.
 import type { Page } from '@playwright/test';
 
-const STATES = ['markers', 'popup', 'invalid', 'nav', 'afterMap', 'upload', 'success', 'error', 'afterStay'];
-const LAYOUTS = ['A', 'B', 'C'];
+const STATES = ['markers', 'sheetOpen', 'popup', 'invalid', 'nav', 'afterMap', 'upload', 'success', 'error', 'afterStay'];
+// A, B and C were compared on the first two commits of PR #67; D is the owner's pick.
+const LAYOUTS = ['D'];
 
 async function open(page: Page, layout: string, state: string) {
   await page.goto(`/proto/${layout.toLowerCase()}/${state}`);
