@@ -91,3 +91,15 @@ for (let i = 1; i <= 11; i++) {
   eleven[`f${i}.txt`] = SAMPLE_TEXT;
 }
 writeZip('eleven-entries.zip', makeZip(eleven));
+
+// 14. Lying header: declared uncompressedSize = 100, actual = 50 MiB of 'a'
+const fiftyMib = Buffer.alloc(50 * 1024 * 1024, 0x61);
+const lyingZip = Buffer.from(makeZip({ 'lying.txt': new Uint8Array(fiftyMib) }));
+// Local file header uncompressed size at offset 22..25
+lyingZip.writeUInt32LE(100, 22);
+// Central directory header uncompressed size at +24..27
+const lyingCdOffset = lyingZip.indexOf(Buffer.from([0x50, 0x4b, 0x01, 0x02]));
+if (lyingCdOffset !== -1) {
+  lyingZip.writeUInt32LE(100, lyingCdOffset + 24);
+}
+writeZip('lying-header.zip', lyingZip);
