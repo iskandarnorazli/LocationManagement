@@ -5,9 +5,31 @@ import type { Location, NewLocation } from '@lm/shared';
 import type { UserId } from '../auth';
 import { notImplemented } from '../lib/notImplemented';
 
+type DbLocationRow = {
+  id: string;
+  name: string;
+  latitude: number;
+  longitude: number;
+  created_at: Date;
+};
+
+function toLocation(row: DbLocationRow): Location {
+  return {
+    id: row.id,
+    name: row.name,
+    latitude: row.latitude,
+    longitude: row.longitude,
+    createdAt: row.created_at.toISOString(),
+  };
+}
+
 /** The caller's locations, oldest first. */
 export async function listLocations(db: Pool, userId: UserId): Promise<Location[]> {
-  return notImplemented('#4 listLocations', { db, userId });
+  const { rows } = await db.query<DbLocationRow>(
+    'SELECT id, name, latitude, longitude, created_at FROM locations WHERE user_id = $1 ORDER BY created_at ASC, id ASC',
+    [userId],
+  );
+  return rows.map(toLocation);
 }
 
 export async function createLocation(
@@ -15,7 +37,11 @@ export async function createLocation(
   userId: UserId,
   input: NewLocation & { id: string },
 ): Promise<Location> {
-  return notImplemented('#4 createLocation', { db, userId, input });
+  const { rows } = await db.query<DbLocationRow>(
+    'INSERT INTO locations (id, user_id, name, latitude, longitude) VALUES ($1, $2, $3, $4, $5) RETURNING id, name, latitude, longitude, created_at',
+    [input.id, userId, input.name, input.latitude, input.longitude],
+  );
+  return toLocation(rows[0]!);
 }
 
 /** Inserts all rows inside the caller's transaction, in order; returns them in the same order. */

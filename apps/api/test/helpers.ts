@@ -1,8 +1,10 @@
 // Test wiring (D18): a fixed clock and sequential ids, so a failing run replays exactly.
+import { UserResponse, type User } from '@lm/shared';
+import type { Express } from 'express';
 import { pino } from 'pino';
 import type { Pool } from 'pg';
+import request, { type Response } from 'supertest';
 import type { z } from 'zod';
-import type { Response } from 'supertest';
 import { expect } from 'vitest';
 import { createApp } from '../src/app';
 import { createPool } from '../src/db/pool';
@@ -45,4 +47,16 @@ export function expectBody<S extends z.ZodType>(res: Response, status: number, s
 /** Deletes every user and location; call in beforeEach of tests that write. */
 export async function resetData(db: Pool): Promise<void> {
   await db.query('TRUNCATE locations, users');
+}
+
+/** Registers a user via POST /api/auth/register and returns a cookie-keeping agent. */
+export async function signUp(
+  app: Express,
+  email: string,
+  password = 'password123',
+): Promise<{ agent: ReturnType<typeof request.agent>; user: User }> {
+  const agent = request.agent(app);
+  const res = await agent.post('/api/auth/register').send({ email, password });
+  const { user } = expectBody(res, 201, UserResponse);
+  return { agent, user };
 }
