@@ -3,6 +3,7 @@
 import type { Page } from '@playwright/test';
 import { poolEmail, POOL_PASSWORD, signInAs } from './auth';
 import { KL_IMPORTED, KL_SAVED, mapReady, stubLocations, tilesLoaded } from './locations';
+import { chooseZip, SAMPLE_ZIP, stubImportOk, TWO_FILES_ZIP } from './uploads';
 
 export type ScreenState = {
   id: string;
@@ -152,9 +153,73 @@ export const SCREENS: ScreenState[] = [
       await tilesLoaded(page);
     },
   },
-  { id: 'S4.idle', status: 'planned' },
-  { id: 'S4.chosen', status: 'planned' },
-  { id: 'S4.success', status: 'planned' },
-  { id: 'S4.error', status: 'planned' },
-  { id: 'S4.afterStay', status: 'planned' },
+  {
+    id: 'S4.idle',
+    status: 'built',
+    open: async (page) => {
+      await signInAs(page);
+      await stubLocations(page, KL_SAVED);
+      await page.goto('/upload');
+      await page.getByRole('heading', { name: 'Your locations (3)' }).waitFor();
+    },
+  },
+  {
+    id: 'S4.chosen',
+    status: 'built',
+    open: async (page) => {
+      await signInAs(page);
+      await stubLocations(page, KL_SAVED);
+      await page.goto('/upload');
+      await page.getByRole('heading', { name: 'Your locations (3)' }).waitFor();
+      await chooseZip(page, SAMPLE_ZIP);
+      await page.getByText('one.zip', { exact: true }).waitFor();
+    },
+  },
+  {
+    id: 'S4.success',
+    status: 'built',
+    open: async (page) => {
+      await page.clock.install();
+      await stubImportOk(page);
+      await signInAs(page);
+      await stubLocations(page, KL_SAVED);
+      await page.goto('/upload');
+      await page.getByRole('heading', { name: 'Your locations (3)' }).waitFor();
+      await chooseZip(page, SAMPLE_ZIP);
+      await page.getByRole('button', { name: 'Upload', exact: true }).click();
+      await page.getByRole('status').filter({ hasText: '3 locations added' }).waitFor();
+    },
+  },
+  {
+    id: 'S4.error',
+    status: 'built',
+    open: async (page) => {
+      await page.clock.install();
+      await signInAs(page);
+      await stubLocations(page, KL_SAVED);
+      await page.goto('/upload');
+      await page.getByRole('heading', { name: 'Your locations (3)' }).waitFor();
+      await chooseZip(page, TWO_FILES_ZIP);
+      await page.getByRole('button', { name: 'Upload', exact: true }).click();
+      await page.getByRole('alert').filter({ hasText: 'exactly one text file' }).waitFor();
+    },
+  },
+  {
+    id: 'S4.afterStay',
+    status: 'built',
+    open: async (page) => {
+      await page.clock.install();
+      await stubImportOk(page);
+      await signInAs(page);
+      await stubLocations(page, KL_SAVED);
+      await page.goto('/upload');
+      await page.getByRole('heading', { name: 'Your locations (3)' }).waitFor();
+      await chooseZip(page, SAMPLE_ZIP);
+      await page.getByRole('button', { name: 'Upload', exact: true }).click();
+      await page.getByRole('status').filter({ hasText: '3 locations added' }).waitFor();
+      await page.clock.fastForward(3100);
+      await page.getByRole('link', { name: 'See them on the map' }).waitFor();
+      await page.getByRole('heading', { name: `Your locations (${KL_SAVED.length + KL_IMPORTED.length})` }).waitFor();
+    },
+  },
 ];

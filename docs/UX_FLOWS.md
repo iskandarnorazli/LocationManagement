@@ -61,11 +61,11 @@ its rows to `built` and adds the setup in `e2e/screens.ts`.
 | S3.nav | Map | Phone: the sidebar drawer open over the map (R2, D23) | built |
 | S3.sheetOpen | Map | The sheet swiped up: the form and "Your locations (3)" (D23) | built |
 | S3.focus | Map | Opened from "See them on the map": zoomed to the new markers, sheet open, new rows highlighted (D13) | built |
-| S4.idle | Upload | No file chosen | planned |
-| S4.chosen | Upload | A file chosen, ready to send | planned |
-| S4.success | Upload | The success popup (R11) | planned |
-| S4.error | Upload | The error popup for a ZIP with two files (R12) | planned |
-| S4.afterStay | Upload | After the success popup: the new rows highlighted in the list, with the link to the map (D13) | planned |
+| S4.idle | Upload | No file chosen | built |
+| S4.chosen | Upload | A file chosen, ready to send | built |
+| S4.success | Upload | The success popup (R11) | built |
+| S4.error | Upload | The error popup for a ZIP with two files (R12) | built |
+| S4.afterStay | Upload | After the success popup: the new rows highlighted in the list, with the link to the map (D13) | built |
 
 ## Flows
 
@@ -78,7 +78,7 @@ exists and fails CI over budget; `planned` means its pages are not built yet.
 | F2 | Sign in | S2, empty | 3 | enforced | R1, R3 |
 | F3 | Add a location with the form | S3, signed in | 4 | enforced | R7, R8 |
 | F4 | See a location's name | S3 with markers | 1 | enforced | R9 |
-| F5 | Import locations from a ZIP | S3, signed in | 3 | planned | R10, R11 |
+| F5 | Import locations from a ZIP | S3, signed in | 3 | enforced | R10, R11 |
 | F6 | Sign out | S3, signed in | 1 | enforced | R2 |
 | F7 | Open a protected page while signed out, sign in, land on that page | a protected URL | 3 | enforced | R4 |
 
