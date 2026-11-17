@@ -3,7 +3,6 @@
 import type { Pool, PoolClient } from 'pg';
 import type { Location, NewLocation } from '@lm/shared';
 import type { UserId } from '../auth';
-import { notImplemented } from '../lib/notImplemented';
 
 type DbLocationRow = {
   id: string;
@@ -50,5 +49,20 @@ export async function insertMany(
   userId: UserId,
   rows: ReadonlyArray<NewLocation & { id: string }>,
 ): Promise<Location[]> {
-  return notImplemented('#7 insertMany', { tx, userId, rows });
+  if (rows.length === 0) return [];
+  const ids = rows.map((r) => r.id);
+  const names = rows.map((r) => r.name);
+  const latitudes = rows.map((r) => r.latitude);
+  const longitudes = rows.map((r) => r.longitude);
+
+  const result = await tx.query<DbLocationRow>(
+    `INSERT INTO locations (id, user_id, name, latitude, longitude)
+     SELECT t.id, $2, t.name, t.latitude, t.longitude
+     FROM unnest($1::uuid[], $3::text[], $4::double precision[], $5::double precision[])
+       WITH ORDINALITY AS t(id, name, latitude, longitude, ord)
+     ORDER BY t.ord
+     RETURNING id, name, latitude, longitude, created_at`,
+    [ids, userId, names, latitudes, longitudes],
+  );
+  return result.rows.map(toLocation);
 }

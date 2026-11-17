@@ -50,11 +50,11 @@ its rows to `built` and adds the setup in `e2e/screens.ts`.
 | State | Screen | What it shows | Status |
 |---|---|---|---|
 | S0.home | Placeholder | The scaffold's home page (removed when S2 is built) | built |
-| S1.empty | Register | Empty form | planned |
-| S1.invalid | Register | Field errors after submitting an invalid email and a short password | planned |
-| S1.taken | Register | "An account with this email already exists." | planned |
-| S2.empty | Login | Empty form | planned |
-| S2.wrong | Login | "Email or password is incorrect." | planned |
+| S1.empty | Register | Empty form | built |
+| S1.invalid | Register | Field errors after submitting an invalid email and a short password | built |
+| S1.taken | Register | "An account with this email already exists." | built |
+| S2.empty | Login | Empty form | built |
+| S2.wrong | Login | "Email or password is incorrect." | built |
 | S3.empty | Map | A new user's map: no markers, the form empty | planned |
 | S3.markers | Map | Three markers in Kuala Lumpur | planned |
 | S3.popup | Map | A marker's popup showing its name (R9) | planned |
@@ -75,13 +75,13 @@ exists and fails CI over budget; `planned` means its pages are not built yet.
 
 | Flow | Task | Starts on | Budget | Status | Requirements |
 |---|---|---|---|---|---|
-| F1 | Create an account | S1, empty | 3 | planned | R1, R3 |
-| F2 | Sign in | S2, empty | 3 | planned | R1, R3 |
+| F1 | Create an account | S1, empty | 3 | enforced | R1, R3 |
+| F2 | Sign in | S2, empty | 3 | enforced | R1, R3 |
 | F3 | Add a location with the form | S3, signed in | 4 | planned | R7, R8 |
 | F4 | See a location's name | S3 with markers | 1 | planned | R9 |
 | F5 | Import locations from a ZIP | S3, signed in | 3 | planned | R10, R11 |
 | F6 | Sign out | S3, signed in | 1 | planned | R2 |
-| F7 | Open a protected page while signed out, sign in, land on that page | a protected URL | 3 | planned | R4 |
+| F7 | Open a protected page while signed out, sign in, land on that page | a protected URL | 3 | enforced | R4 |
 
 Why these budgets: F1 and F2 are two fields and a button. F3 is three fields and a button; a
 design that fills the coordinates from a map click could lower it to 3, a question for the

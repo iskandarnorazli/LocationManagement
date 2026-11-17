@@ -39,7 +39,7 @@ describe('AppRoutes', () => {
       </MemoryRouter>,
     );
 
-    expect(screen.getByRole('heading', { name: 'Login' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Sign in' })).toBeInTheDocument();
     expect(screen.getByTestId('loc')).toHaveTextContent('/login{"from":"/map"}');
   });
 
@@ -51,11 +51,11 @@ describe('AppRoutes', () => {
       </MemoryRouter>,
     );
 
-    expect(screen.getByRole('heading', { name: 'Login' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Sign in' })).toBeInTheDocument();
     expect(screen.getByTestId('loc')).toHaveTextContent('/login{"from":"/upload"}');
   });
 
-  it('renders /login and /register even when signed in', () => {
+  it('redirects signed-in /login and /register to /map', () => {
     useSessionStore.setState({ state: { kind: 'signedIn', user: sampleUser } });
 
     const { unmount } = render(
@@ -63,7 +63,7 @@ describe('AppRoutes', () => {
         <AppRoutes />
       </MemoryRouter>,
     );
-    expect(screen.getByRole('heading', { name: 'Login' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Map' })).toBeInTheDocument();
     unmount();
 
     render(
@@ -71,7 +71,7 @@ describe('AppRoutes', () => {
         <AppRoutes />
       </MemoryRouter>,
     );
-    expect(screen.getByRole('heading', { name: 'Register' })).toBeInTheDocument();
+    expect(screen.getByRole('heading', { name: 'Map' })).toBeInTheDocument();
   });
 
   it('redirects / to /map (and renders Map when signed in)', () => {
