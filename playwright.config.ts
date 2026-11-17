@@ -13,12 +13,18 @@ export default defineConfig({
   projects: [
     {
       name: 'e2e',
-      testIgnore: /snapshots\.spec\.ts/,
+      testIgnore: /(snapshots|demo)\.spec\.ts/,
       // With SNAP_DIR set (the UI snapshots workflow), each flow is also recorded as a video:
       // e2e/test.ts saves it to SNAP_DIR/videos/<Flow>.webm, and the workflow makes a GIF of it.
       use: { video: process.env.SNAP_DIR ? { mode: 'on', size: { width: 960, height: 540 } } : 'off' },
     },
     { name: 'snapshots', testMatch: /snapshots\.spec\.ts/ },
+    // The README's demo (#13), recorded only by the UI snapshots workflow: `--project=demo`.
+    {
+      name: 'demo',
+      testMatch: /demo\.spec\.ts/,
+      use: { video: { mode: 'on', size: { width: 1280, height: 720 } } },
+    },
   ],
   webServer: {
     command: 'npm run dev -w @lm/web',

@@ -53,7 +53,7 @@ jobs:
           SNAP_ONLY: ${{ github.event.inputs.only }}
         run: |
           set +e
-          npx playwright test --project=snapshots --project=e2e
+          npx playwright test --project=snapshots --project=e2e --project=demo
           echo "status=$?" >> "$GITHUB_ENV"
           mkdir -p snapshots
       - name: Flow videos as GIFs
@@ -67,6 +67,12 @@ jobs:
               -vf "fps=10,scale=640:-1:flags=lanczos,split[a][b];[a]palettegen=max_colors=96[p];[b][p]paletteuse" \
               -loop 0 "${v%.webm}.gif"
           done
+          # The README's demo, lighter: fewer frames and colours (#13).
+          if [ -f snapshots/videos/Demo.webm ]; then
+            ffmpeg -loglevel error -y -i snapshots/videos/Demo.webm \
+              -vf "fps=6,scale=720:-1:flags=lanczos,split[a][b];[a]palettegen=max_colors=64:stats_mode=diff[p];[b][p]paletteuse=dither=none:diff_mode=rectangle" \
+              -loop 0 snapshots/videos/Demo-readme.gif
+          fi
           ls -la snapshots/videos
       - name: Where the images go
         run: |
