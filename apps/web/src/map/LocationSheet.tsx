@@ -33,6 +33,8 @@ export function LocationSheet({
 
   const onPointerDown = (e: PointerEvent<HTMLButtonElement>) => {
     startY.current = e.clientY;
+    // A swipe ends off the handle: capture the pointer so pointerup still comes here.
+    e.currentTarget.setPointerCapture?.(e.pointerId);
   };
   const onPointerUp = (e: PointerEvent<HTMLButtonElement>) => {
     if (startY.current === null) return;

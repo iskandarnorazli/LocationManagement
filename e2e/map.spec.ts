@@ -28,3 +28,22 @@ test('a new location appears as a clickable marker without reloading the page (R
   await expect(page.locator('.leaflet-popup').getByText(name)).toBeVisible();
   await expect(page.getByLabel('Name')).toHaveValue('');
 });
+
+test('a real swipe on the handle opens and closes the list (D23)', async ({ page }) => {
+  await signInAs(page);
+  await page.goto('/map');
+  await mapReady(page);
+  const handle = page.getByRole('button', { name: /Swipe (up for|down to hide) your locations/ });
+  const swipe = async (dy: number) => {
+    const box = await handle.boundingBox();
+    if (!box) throw new Error('no handle');
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2);
+    await page.mouse.down();
+    await page.mouse.move(box.x + box.width / 2, box.y + box.height / 2 + dy, { steps: 10 });
+    await page.mouse.up();
+  };
+  await swipe(-120);
+  await expect(handle).toHaveAttribute('aria-expanded', 'true');
+  await swipe(120);
+  await expect(handle).toHaveAttribute('aria-expanded', 'false');
+});
