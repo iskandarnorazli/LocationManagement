@@ -28,5 +28,18 @@ export async function stubLocations(page: Page, locations: Loc[]): Promise<void>
 export async function mapReady(page: Page, count?: number): Promise<void> {
   const label = count === undefined ? /Swipe up for your locations \(\d+\)/ : `Swipe up for your locations (${count})`;
   await page.getByRole('button', { name: label }).waitFor();
-  await page.waitForLoadState('networkidle', { timeout: 10_000 }).catch(() => undefined);
+  await tilesLoaded(page);
+}
+
+/** Waits (at most 10 s) until no map tile is still loading, so screenshots show the map. */
+export async function tilesLoaded(page: Page): Promise<void> {
+  await page
+    .waitForFunction(
+      () =>
+        document.querySelectorAll('.leaflet-tile').length > 0 &&
+        document.querySelectorAll('.leaflet-tile:not(.leaflet-tile-loaded)').length === 0,
+      undefined,
+      { timeout: 10_000 },
+    )
+    .catch(() => undefined);
 }

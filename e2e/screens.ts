@@ -2,7 +2,7 @@
 // A built state has `open`, which brings a fresh page to exactly that state with fixed data.
 import type { Page } from '@playwright/test';
 import { poolEmail, POOL_PASSWORD, signInAs } from './auth';
-import { KL_IMPORTED, KL_SAVED, mapReady, stubLocations } from './locations';
+import { KL_IMPORTED, KL_SAVED, mapReady, stubLocations, tilesLoaded } from './locations';
 import { chooseZip, SAMPLE_ZIP, stubImportOk, TWO_FILES_ZIP } from './uploads';
 
 export type ScreenState = {
@@ -150,7 +150,7 @@ export const SCREENS: ScreenState[] = [
         window.dispatchEvent(new PopStateEvent('popstate', { state: window.history.state }));
       }, focusIds);
       await page.getByRole('heading', { name: 'Your locations (6)' }).waitFor();
-      await page.waitForLoadState('networkidle', { timeout: 10_000 }).catch(() => undefined);
+      await tilesLoaded(page);
     },
   },
   {
