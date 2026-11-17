@@ -23,8 +23,8 @@ type View = {
   state: ProtoState;
   page: Page;
   locations: ProtoLocation[];
-  fit?: ProtoLocation[];
-  popupId?: string;
+  fit?: ProtoLocation[] | undefined;
+  popupId?: string | undefined;
   invalid: boolean;
   navOpen: boolean;
   chosen: string | null;
@@ -66,6 +66,11 @@ function Brand({ dark }: { dark: boolean }) {
 
 /** A: the map fills the screen; the form floats over it (a bottom sheet on a phone). */
 export function LayoutA({ v }: { v: View }) {
+  // Keep markers out from under the floating form: right on desktop, bottom on a phone.
+  const phone = window.innerWidth < 768;
+  const pad = phone
+    ? { topLeft: [40, 40] as [number, number], bottomRight: [40, 330] as [number, number] }
+    : { topLeft: [48, 48] as [number, number], bottomRight: [380, 48] as [number, number] };
   return (
     <div className="flex h-screen flex-col bg-slate-100 md:flex-row">
       <aside className="hidden w-60 shrink-0 flex-col justify-between bg-slate-900 p-4 md:flex">
@@ -79,7 +84,7 @@ export function LayoutA({ v }: { v: View }) {
       <main className="relative min-h-0 flex-1">
         {v.page === 'map' ? (
           <>
-            <ProtoMap locations={v.locations} fit={v.fit} popupId={v.popupId} />
+            <ProtoMap locations={v.locations} fit={v.fit} popupId={v.popupId} pad={pad} />
             {v.state === 'afterMap' && <Toast>3 new locations from kl-places.zip</Toast>}
             <div className="absolute inset-x-3 bottom-3 z-[1000] md:inset-x-auto md:bottom-auto md:right-4 md:top-4 md:w-80">
               <Card title="Add a location">
