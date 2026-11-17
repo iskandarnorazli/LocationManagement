@@ -55,7 +55,7 @@ if (videos.length) {
     const flow = v.replace(/\.gif$/, '');
     const webm = `${dest}/videos/${flow}.webm`;
     const full = existsSync(path.join(root, webm)) ? ` ([full video](https://github.com/${repo}/blob/ui-snapshots/${webm}?raw=true))` : '';
-    out.push(`**${flow}**${full}`, '', img(`${dest}/videos/${v}`, 480), '');
+    out.push(`**${flow}**${full}`, '', img(`${dest}/videos/${v}`, 640), '');
   }
 }
 process.stdout.write(out.join('\n'));

@@ -64,7 +64,7 @@ jobs:
           command -v ffmpeg >/dev/null || { sudo apt-get update -q && sudo apt-get install -y -q ffmpeg; }
           for v in "${videos[@]}"; do
             ffmpeg -loglevel error -y -i "$v" \
-              -vf "fps=8,scale=480:-1:flags=lanczos,split[a][b];[a]palettegen=max_colors=96[p];[b][p]paletteuse" \
+              -vf "fps=10,scale=640:-1:flags=lanczos,split[a][b];[a]palettegen=max_colors=96[p];[b][p]paletteuse" \
               -loop 0 "${v%.webm}.gif"
           done
           ls -la snapshots/videos
