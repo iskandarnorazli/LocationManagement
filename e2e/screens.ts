@@ -17,11 +17,60 @@ export const SCREENS: ScreenState[] = [
       await page.getByRole('heading', { name: 'Location Management' }).waitFor();
     },
   },
-  { id: 'S1.empty', status: 'planned' },
-  { id: 'S1.invalid', status: 'planned' },
-  { id: 'S1.taken', status: 'planned' },
-  { id: 'S2.empty', status: 'planned' },
-  { id: 'S2.wrong', status: 'planned' },
+  {
+    id: 'S1.empty',
+    status: 'built',
+    open: async (page) => {
+      await page.goto('/register');
+      await page.getByRole('heading', { name: 'Create an account' }).waitFor();
+    },
+  },
+  {
+    id: 'S1.invalid',
+    status: 'built',
+    open: async (page) => {
+      await page.goto('/register');
+      await page.getByLabel('Email').fill('not-an-email');
+      await page.getByLabel('Password').fill('short');
+      await page.getByRole('button', { name: 'Create account' }).click();
+      await page.locator('#email-error').waitFor();
+    },
+  },
+  {
+    id: 'S1.taken',
+    status: 'built',
+    open: async (page) => {
+      const email = `taken-${Date.now()}@example.com`;
+      await page.request.post('/api/auth/register', {
+        data: { email, password: 'password123' },
+      });
+      await page.context().clearCookies();
+      await page.goto('/register');
+      await page.getByLabel('Email').fill(email);
+      await page.getByLabel('Password').fill('password123');
+      await page.getByRole('button', { name: 'Create account' }).click();
+      await page.getByRole('alert').waitFor();
+    },
+  },
+  {
+    id: 'S2.empty',
+    status: 'built',
+    open: async (page) => {
+      await page.goto('/login');
+      await page.getByRole('heading', { name: 'Sign in' }).waitFor();
+    },
+  },
+  {
+    id: 'S2.wrong',
+    status: 'built',
+    open: async (page) => {
+      await page.goto('/login');
+      await page.getByLabel('Email').fill('nobody@example.com');
+      await page.getByLabel('Password').fill('password123');
+      await page.getByRole('button', { name: 'Sign in' }).click();
+      await page.getByRole('alert').waitFor();
+    },
+  },
   { id: 'S3.empty', status: 'planned' },
   { id: 'S3.markers', status: 'planned' },
   { id: 'S3.popup', status: 'planned' },
