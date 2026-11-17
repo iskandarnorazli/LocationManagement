@@ -15,6 +15,7 @@ export function UploadPage() {
   const [added, setAdded] = useState<{ ids: string[]; file: string } | null>(null);
   const fileName = useRef('');
   const pending = useRef<Location[] | null>(null);
+  const input = useRef<HTMLInputElement>(null);
 
   const onSucceeded = useCallback(
     (locations: Location[]) => {
@@ -41,6 +42,12 @@ export function UploadPage() {
     },
     [addMany],
   );
+
+  // Back to idle after a popup: clear the native input, so it stops showing the old file and
+  // choosing the same file again still fires a change.
+  useEffect(() => {
+    if (state.kind === 'idle' && input.current) input.current.value = '';
+  }, [state.kind]);
 
   const onChoose = (e: ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -81,6 +88,7 @@ export function UploadPage() {
             </label>
             <p className="mt-1 text-xs text-slate-600">One .txt file inside, at most 1 MiB</p>
             <input
+              ref={input}
               id="zip-file"
               type="file"
               accept=".zip,application/zip"
