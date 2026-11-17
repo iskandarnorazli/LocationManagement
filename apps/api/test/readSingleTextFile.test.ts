@@ -127,4 +127,12 @@ describe('readSingleTextFile (D9)', () => {
       throw new Error(`Expected ZIP_ENTRY_COUNT, got ${JSON.stringify(res)}`);
     }
   });
+
+  it('rejects a ZIP whose header lies about uncompressedSize (100 declared, 50 MiB actual)', async () => {
+    const res = await readSingleTextFile(fixture('lying-header.zip'));
+    expect(res.ok).toBe(false);
+    if (!res.ok) {
+      expect(['ZIP_INVALID', 'ZIP_NOT_TEXT']).toContain(res.code);
+    }
+  });
 });

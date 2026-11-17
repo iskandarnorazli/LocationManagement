@@ -91,7 +91,7 @@ function uxTables(text) {
   return rows;
 }
 const uxPath = 'docs/UX_FLOWS.md';
-let baseUx = null;
+let baseUx;
 try {
   baseUx = git('show', `${base}:${uxPath}`);
 } catch {

@@ -6,7 +6,9 @@ import { initialUpload, POPUP_MS, uploadReducer } from './uploadMachine';
 export function useUploadFlow(onSucceeded: (locations: Location[]) => void) {
   const [state, dispatch] = useReducer(uploadReducer, initialUpload);
   const onSucceededRef = useRef(onSucceeded);
-  onSucceededRef.current = onSucceeded;
+  useEffect(() => {
+    onSucceededRef.current = onSucceeded;
+  }, [onSucceeded]);
 
   useEffect(() => {
     if (state.kind !== 'succeeded' && state.kind !== 'failed') return;

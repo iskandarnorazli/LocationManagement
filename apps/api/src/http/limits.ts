@@ -2,7 +2,7 @@
 // port (D18), so tests move time with fixedClock().advance(). Issue #36 fills the bodies.
 import type { Request, RequestHandler } from 'express';
 import type { Clock } from '../ports';
-import { notImplemented } from '../lib/notImplemented';
+import { AppError } from './AppError';
 
 export const LIMITS = {
   importConcurrency: 4,
@@ -17,7 +17,26 @@ export const LIMITS = {
  * throws.
  */
 export function concurrencyLimit(max: number): RequestHandler {
-  return (req, res, next) => notImplemented('#36 concurrencyLimit', { max, req, res, next });
+  let active = 0;
+
+  return (_req, res, next) => {
+    if (active >= max) {
+      res.setHeader('Retry-After', '1');
+      throw new AppError('RATE_LIMITED', 'Too many concurrent requests.', { retryAfterSeconds: 1 });
+    }
+
+    active += 1;
+    let released = false;
+    const release = () => {
+      if (released) return;
+      released = true;
+      active -= 1;
+    };
+
+    res.once('finish', release);
+    res.once('close', release);
+    next();
+  };
 }
 
 export type RateLimitOptions = {
@@ -33,5 +52,42 @@ export type RateLimitOptions = {
  * dropped, so memory stays bounded.
  */
 export function rateLimit(opts: RateLimitOptions, clock: Clock): RequestHandler {
-  return (req, res, next) => notImplemented('#36 rateLimit', { opts, clock, req, res, next });
+  const buckets = new Map<string, { count: number; resetAt: number }>();
+  let nextSweepAt = clock.now() + opts.windowMs;
+
+  return (req, res, next) => {
+    const bucketKey = opts.key(req);
+    if (bucketKey === null) {
+      next();
+      return;
+    }
+
+    const now = clock.now();
+    if (now >= nextSweepAt) {
+      for (const [k, entry] of buckets) {
+        if (entry.resetAt <= now) {
+          buckets.delete(k);
+        }
+      }
+      nextSweepAt = now + opts.windowMs;
+    }
+
+    const existing = buckets.get(bucketKey);
+    if (!existing || existing.resetAt <= now) {
+      buckets.set(bucketKey, { count: 1, resetAt: now + opts.windowMs });
+      next();
+      return;
+    }
+
+    if (existing.count >= opts.max) {
+      const retryAfterSeconds = Math.max(1, Math.ceil((existing.resetAt - now) / 1000));
+      res.setHeader('Retry-After', String(retryAfterSeconds));
+      throw new AppError('RATE_LIMITED', 'Too many requests. Please try again later.', {
+        retryAfterSeconds,
+      });
+    }
+
+    existing.count += 1;
+    next();
+  };
 }
