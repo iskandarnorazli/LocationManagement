@@ -44,10 +44,33 @@ flowchart LR
 | D14 | Tests: Vitest in api and web, supertest against a real Postgres (no database mocks), Playwright end to end against `docker compose`. Extended by D18. | proposed |
 | D15 | Config is read once at start from the environment and validated with zod; the API refuses to start without `DATABASE_URL` and a `JWT_SECRET` of at least 32 characters. | proposed |
 | D16 | `package-lock.json` is committed and CI runs `npm ci`. A session without network changes dependencies through the `lockfile` workflow (as Awanfs decision 17). | proposed |
+| D21 | No size or count a client sends is trusted (owner, 2026-11-17). Every input has a hard limit (the Limits table), uploads are bounded by bytes actually read, not by what a header claims, and floods get `429 RATE_LIMITED`: at most 4 imports run at once, 10 imports a minute per user, 10 logins and 5 registrations a minute per IP. The limiter is ours (`http/limits.ts`, driven by `Clock`), not `express-rate-limit`, which reads the system clock (D18). CI runs `npm audit --omit=dev --audit-level=high` and Dependabot keeps npm, the Docker base image and Actions patched, since native code (Node's zlib, OpenSSL) is the only place a memory bug could live. | decided (owner, 2026-11-17) |
 | D17 | The API is feature modules with a pure core: `auth/`, `locations/`, `import/`, each with one public `index.ts`. Inside a feature, pure functions decide (parse, validate, compare) and one repository file runs its SQL. `app.ts` is the only composition root; features receive `Deps`. The skeleton fixes every signature; issues fill bodies. | decided (owner, 2026-11-16) |
 | D18 | Tests are deterministic. Time and ids come from the `Clock` and `Ids` ports in `apps/api/src/ports.ts`; tests use `fixedClock` and `sequentialIds`. A seeded model-based test runs random command sequences for several users against the real API on Postgres and against `test/model/referenceModel.ts`, and compares what each user sees after every command. A failure prints the seed that replays it. Full simulation (simulated database, network, scheduler) was considered and rejected: nothing here is concurrent or distributed. | decided (owner, 2026-11-16) |
 | D19 | Frontend state machines are reducers over discriminated unions with the transition table exported as data (`apps/web/src/lib/machine.ts`). Considered: XState (a dependency and a learning curve for assessors), stores with flags (the drift this avoids). | decided (owner, 2026-11-16) |
 | D20 | The architecture is enforced by checks, not by prose. The list is in "What enforces it" below; a new rule goes there and into CI in the same change. | decided (owner, 2026-11-16) |
+
+## Limits (D21)
+
+Every number a client controls is bounded here. Changing one is a decided change.
+
+| Input | Limit | Where | Over the limit |
+|---|---|---|---|
+| JSON body | 100 KiB | `express.json` in `app.ts` | `413 PAYLOAD_TOO_LARGE` |
+| Upload file | 1 MiB | multer `fileSize` (`import/routes.ts`, #7) | `413 PAYLOAD_TOO_LARGE` |
+| Multipart shape | 1 file, 0 other fields, 1 part, 20 header pairs | multer `limits` (#7) | `400 VALIDATION_FAILED` |
+| ZIP entries read | 10 | `MAX_ENTRIES` (`readSingleTextFile.ts`) | `422 ZIP_ENTRY_COUNT` |
+| Unpacked text | 5 MiB, counted on the bytes inflated; a header that understates is caught by yauzl's size check (#35) | `MAX_UNCOMPRESSED_BYTES` | `422 ZIP_NOT_TEXT` or `ZIP_INVALID` |
+| Encrypted entries | refused | `readSingleTextFile.ts` | `422 ZIP_INVALID` |
+| Data lines | 5,000; errors reported: 20 | `parseLocations.ts` | `422 FILE_ROWS_INVALID` |
+| Name | 1 to 200 characters | shared `NewLocation`, DB `CHECK` | `400` / `422` |
+| Password | 8 to 128 characters | shared `Credentials` | `400 VALIDATION_FAILED` |
+| Imports at once (server) | 4 | `LIMITS.importConcurrency` (#36) | `429 RATE_LIMITED` |
+| Imports per user | 10 a minute | `LIMITS.importPerUserPerMinute` (#36) | `429 RATE_LIMITED` |
+| Logins / registrations per IP | 10 / 5 a minute | `LIMITS` (#36) | `429 RATE_LIMITED` |
+| Session | 1 hour | `SESSION_SECONDS` | `401 TOKEN_EXPIRED` |
+
+Nothing from an upload is written to disk or extracted: the ZIP is read in memory, one entry, and only its text is kept.
 
 ## Module map (D17)
 

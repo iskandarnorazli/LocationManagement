@@ -42,6 +42,7 @@ type ErrorBody = {
 | `ZIP_NOT_TEXT` | 422 | The one file is not `.txt`, not UTF-8, holds a NUL byte, or is over 5 MiB unpacked | `{ file: string }` | Error popup, 3 s |
 | `FILE_EMPTY` | 422 | The text file has no data lines | none | Error popup, 3 s |
 | `FILE_ROWS_INVALID` | 422 | One or more lines break D10 | `{ rows: [{ line: number, reason: string }], total: number }` (first 20) | Error popup, 3 s, with the first bad line |
+| `RATE_LIMITED` | 429 | Too many requests: an import while 4 are running, more than 10 imports a minute for one user, or more than 10 logins / 5 registrations a minute from one IP (D21). The response also has `Retry-After` | `{ retryAfterSeconds }` | Auth forms: "Too many attempts. Try again in a minute." Upload: error popup, 3 s |
 | `UNAVAILABLE` | 503 | `/health/ready` cannot reach Postgres | none | n/a |
 | `INTERNAL` | 500 | Anything not above | none | "Something went wrong. Try again." |
 
