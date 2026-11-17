@@ -7,6 +7,7 @@ import multer from 'multer';
 import type { Deps } from '../deps';
 import { requireAuth, userIdOf, type UserId } from '../auth';
 import { AppError } from '../http/AppError';
+import { concurrencyLimit, LIMITS, rateLimit } from '../http/limits';
 import { insertMany } from '../locations';
 import { parseLocations } from './parseLocations';
 import { readSingleTextFile } from './readSingleTextFile';
@@ -46,9 +47,15 @@ const upload = multer({
 
 export function importRouter(deps: Deps): Router {
   const router = Router();
+  const importRateLimit = rateLimit(
+    { windowMs: 60_000, max: LIMITS.importPerUserPerMinute, key: (req) => userIdOf(req) },
+    deps.clock,
+  );
+  const importConcurrency = concurrencyLimit(LIMITS.importConcurrency);
+
   router.use(requireAuth(deps));
 
-  router.post('/', upload.single('file'), async (req, res) => {
+  router.post('/', importRateLimit, importConcurrency, upload.single('file'), async (req, res) => {
     if (!req.file) {
       throw new AppError('VALIDATION_FAILED', 'A ZIP file in field "file" is required.', [
         { path: 'file', message: 'File is required' },

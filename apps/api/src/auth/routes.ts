@@ -3,6 +3,7 @@ import { Credentials } from '@lm/shared';
 import { Router } from 'express';
 import type { Deps } from '../deps';
 import { AppError } from '../http/AppError';
+import { LIMITS, rateLimit } from '../http/limits';
 import * as passwordModule from './password';
 import { requireAuth, userIdOf } from './requireAuth';
 import { sessionCookie, signSession } from './session';
@@ -14,8 +15,16 @@ const DUMMY_HASH_PROMISE = passwordModule.hashPassword('dummy-password-for-const
 export function authRouter(deps: Deps): Router {
   const router = Router();
   const auth = requireAuth(deps);
+  const registerRateLimit = rateLimit(
+    { windowMs: 60_000, max: LIMITS.registerPerIpPerMinute, key: (req) => req.ip ?? 'unknown' },
+    deps.clock,
+  );
+  const loginRateLimit = rateLimit(
+    { windowMs: 60_000, max: LIMITS.loginPerIpPerMinute, key: (req) => req.ip ?? 'unknown' },
+    deps.clock,
+  );
 
-  router.post('/register', async (req, res) => {
+  router.post('/register', registerRateLimit, async (req, res) => {
     const { email, password } = Credentials.parse(req.body);
     const passwordHash = await passwordModule.hashPassword(password);
     const user = await createUser(deps.db, {
@@ -28,7 +37,7 @@ export function authRouter(deps: Deps): Router {
     res.status(201).json({ user });
   });
 
-  router.post('/login', async (req, res) => {
+  router.post('/login', loginRateLimit, async (req, res) => {
     const { email, password } = Credentials.parse(req.body);
     const row = await findUserByEmail(deps.db, email);
     const hashToCheck = row ? row.passwordHash : await DUMMY_HASH_PROMISE;
