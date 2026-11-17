@@ -1,7 +1,6 @@
 // docs/STATE_MACHINES.md "Session". Issue #8 fills the reducer.
 import type { User } from '@lm/shared';
 import type { Transition } from '../lib/machine';
-import { notImplemented } from '../lib/notImplemented';
 import type { ApiError } from '../api/client';
 
 export const SESSION_KINDS = ['checking', 'signedOut', 'submitting', 'signedIn'] as const;
@@ -42,5 +41,30 @@ export const SESSION_TRANSITIONS: ReadonlyArray<Transition<SessionKind, SessionE
 export const initialSession: SessionState = { kind: 'checking' };
 
 export function sessionReducer(state: SessionState, event: SessionEvent): SessionState {
-  return notImplemented('#8 sessionReducer', { state, event });
+  switch (state.kind) {
+    case 'checking':
+      if (event.type === 'ME_OK') return { kind: 'signedIn', user: event.user };
+      if (event.type === 'ME_401') return { kind: 'signedOut', error: null, returnTo: null };
+      if (event.type === 'NETWORK') return { kind: 'signedOut', error: event.error, returnTo: null };
+      return state;
+
+    case 'signedOut':
+      if (event.type === 'LOGIN' || event.type === 'REGISTER') {
+        return { kind: 'submitting', returnTo: state.returnTo };
+      }
+      return state;
+
+    case 'submitting':
+      if (event.type === 'AUTH_OK') return { kind: 'signedIn', user: event.user };
+      if (event.type === 'AUTH_FAILED') {
+        return { kind: 'signedOut', error: event.error, returnTo: state.returnTo };
+      }
+      return state;
+
+    case 'signedIn':
+      if (event.type === 'LOGOUT' || event.type === 'ANY_401') {
+        return { kind: 'signedOut', error: null, returnTo: null };
+      }
+      return state;
+  }
 }
