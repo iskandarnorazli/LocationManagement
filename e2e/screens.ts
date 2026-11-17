@@ -1,7 +1,7 @@
 // One entry per row of the Screens table in docs/UX_FLOWS.md (check-ux.mjs keeps them equal).
 // A built state has `open`, which brings a fresh page to exactly that state with fixed data.
 import type { Page } from '@playwright/test';
-import { poolEmail, POOL_PASSWORD, signInAs } from './auth';
+import { poolEmail, POOL_PASSWORD, signInAs, stubRegisterTaken } from './auth';
 import { KL_IMPORTED, KL_SAVED, mapReady, stubLocations } from './locations';
 import { chooseZip, SAMPLE_ZIP, stubImportOk, TWO_FILES_ZIP } from './uploads';
 
@@ -35,7 +35,9 @@ export const SCREENS: ScreenState[] = [
     id: 'S1.taken',
     status: 'built',
     open: async (page) => {
-      // The pool user's email is already taken (D24): no extra registration.
+      // The API's 409 answer, stubbed (D24: a stub costs no registration). The real path is
+      // covered by apps/api/test/auth.test.ts and RegisterPage.test.tsx.
+      await stubRegisterTaken(page);
       await page.goto('/register');
       await page.getByLabel('Email').fill(poolEmail());
       await page.getByLabel('Password').fill(POOL_PASSWORD);

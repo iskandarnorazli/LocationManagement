@@ -2,11 +2,11 @@
 // 1. Refuses specs that would bypass the auth budget: a direct call to /api/auth/, or a `test`
 //    imported straight from @playwright/test (whose page has no counting listener).
 // 2. Resets the auth-call counter.
-// 3. Registers the run's pool user through the API and saves its cookie for signInAs().
+// 3. Registers the run's pool users through the API and saves their cookies for signInAs().
 import { readdirSync, readFileSync, rmSync, mkdirSync } from 'node:fs';
 import path from 'node:path';
 import { request } from '@playwright/test';
-import { apiRegister, AUTH_DIR, poolEmail, STATE_FILE } from './auth';
+import { apiRegister, AUTH_DIR, POOL_USERS, poolEmail, stateFile } from './auth';
 
 const E2E_DIR = import.meta.dirname;
 const ALLOWED_AUTH_CALLERS = new Set(['auth.ts', 'global-setup.ts']);
@@ -44,11 +44,13 @@ export default async function globalSetup(): Promise<void> {
   mkdirSync(AUTH_DIR, { recursive: true });
   process.env.E2E_RUN = String(Date.now());
 
-  const ctx = await request.newContext();
-  try {
-    await apiRegister(ctx, poolEmail());
-    await ctx.storageState({ path: STATE_FILE });
-  } finally {
-    await ctx.dispose();
+  for (const user of POOL_USERS) {
+    const ctx = await request.newContext();
+    try {
+      await apiRegister(ctx, poolEmail(user));
+      await ctx.storageState({ path: stateFile(user) });
+    } finally {
+      await ctx.dispose();
+    }
   }
 }

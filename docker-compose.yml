@@ -1,5 +1,7 @@
-# Local and e2e stack: Postgres and the API (R20). The web runs with `npm run dev -w apps/web`,
-# which proxies /api to the API on port 3000.
+# The whole app (R20, #13): `docker compose up -d --build`, then open http://localhost:8080.
+# - db: Postgres 16; api: the Express API on :3000; web: the built SPA on :8080 (nginx, which
+#   forwards /api to the api container).
+# For development, run only db (and api), and `npm run dev -w @lm/web` on :5173 instead.
 services:
   db:
     image: postgres:16-alpine
@@ -26,6 +28,14 @@ services:
     ports: ["3000:3000"]
     depends_on:
       db:
+        condition: service_healthy
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    ports: ["8080:80"]
+    depends_on:
+      api:
         condition: service_healthy
 volumes:
   db-data:
