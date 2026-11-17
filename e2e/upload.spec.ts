@@ -18,8 +18,9 @@ test('the sample ZIP imports; after the popup the row is highlighted and the lin
 
   await chooseZip(page, SAMPLE_ZIP);
   await page.getByRole('button', { name: 'Upload', exact: true }).click();
-  const popup = page.getByRole('status').filter({ hasText: '1 location added' });
-  await expect(popup).toBeVisible();
+  // The popup, not the banner that follows it (both are status regions).
+  const popup = page.getByRole('status').filter({ hasText: 'Closes in 3 seconds' });
+  await expect(popup).toContainText('1 location added');
 
   await page.clock.fastForward(3100);
   await page.clock.resume();
