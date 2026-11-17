@@ -24,10 +24,10 @@ jobs:
         run: |
           echo "Run this on a feature branch, then merge its PR." >&2
           exit 1
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           ref: ${{ inputs.branch }}
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version-file: .nvmrc
       - name: Resolve
