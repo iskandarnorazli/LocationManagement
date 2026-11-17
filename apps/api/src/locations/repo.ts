@@ -25,7 +25,7 @@ function toLocation(row: DbLocationRow): Location {
 /** The caller's locations, oldest first. */
 export async function listLocations(db: Pool, userId: UserId): Promise<Location[]> {
   const { rows } = await db.query<DbLocationRow>(
-    'SELECT id, name, latitude, longitude, created_at FROM locations WHERE user_id = $1 ORDER BY created_at ASC, id ASC',
+    'SELECT id, name, latitude, longitude, created_at FROM locations WHERE user_id = $1 ORDER BY seq ASC',
     [userId],
   );
   return rows.map(toLocation);

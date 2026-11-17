@@ -1,7 +1,7 @@
 import { ErrorBody, LocationResponse, LocationsResponse } from '@lm/shared';
 import request from 'supertest';
 import { afterAll, beforeEach, describe, expect, it } from 'vitest';
-import { expectBody, resetData, signUp, testApp, testPool } from './helpers';
+import { expectBody, resetData, signUp, T0, testApp, testPool } from './helpers';
 
 const pool = testPool();
 
@@ -70,5 +70,32 @@ describe('locations endpoints (R5, R7, R8, D11)', () => {
     expect(badNameErr.error.details).toEqual([
       expect.objectContaining({ path: 'name' }),
     ]);
+  });
+
+  it('lists locations in insertion order even when ids are descending (D22)', async () => {
+    let next = 99;
+    const descendingIds = {
+      uuid: () => {
+        const n = String(next--).padStart(12, '0');
+        return `00000000-0000-4000-8000-${n}`;
+      },
+    };
+    const app = testApp(pool, { ids: descendingIds });
+    const { agent } = await signUp(app, 'seq@example.com');
+
+    const names = ['First', 'Second', 'Third'];
+    for (const name of names) {
+      const res = await agent
+        .post('/api/locations')
+        .send({ name, latitude: 3.1, longitude: 101.6 });
+      expectBody(res, 201, LocationResponse);
+    }
+
+    // Force identical created_at (as in a single transaction or same clock tick) so id tie-breaking is exercised.
+    await pool.query('UPDATE locations SET created_at = $1', [new Date(T0)]);
+
+    const list = await agent.get('/api/locations');
+    const body = expectBody(list, 200, LocationsResponse);
+    expect(body.locations.map((l) => l.name)).toEqual(names);
   });
 });

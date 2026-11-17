@@ -40,7 +40,7 @@ flowchart LR
 | D10 | How the text file is parsed. | proposed |
 | D11 | Coordinates are `double precision` columns with `CHECK` constraints for range; the sample has 9 decimal places, which `numeric(9,6)` would round. | proposed |
 | D12 | A location added by the form appears after the API answers 201 (with its id), not optimistically. The submit button is disabled while saving. | proposed |
-| D13 | What the web does in the three seconds after a successful upload. | **open** (frontend design session) |
+| D13 | After a successful upload the user stays on the upload page. The popup shows for 3 s (R11); then the new locations are added to the store, so the map has them, and the upload page highlights them in the list beside the upload card with a "See them on the map" link. The link opens the map zoomed to the new markers, with the sheet open and the new rows highlighted. | decided (owner, 2026-11-17, #11, PR #67) |
 | D14 | Tests: Vitest in api and web, supertest against a real Postgres (no database mocks), Playwright end to end against `docker compose`. Extended by D18. | proposed |
 | D15 | Config is read once at start from the environment and validated with zod; the API refuses to start without `DATABASE_URL` and a `JWT_SECRET` of at least 32 characters. | proposed |
 | D16 | `package-lock.json` is committed and CI runs `npm ci`. A session without network changes dependencies through the `lockfile` workflow (as Awanfs decision 17). | proposed |
@@ -49,6 +49,8 @@ flowchart LR
 | D18 | Tests are deterministic. Time and ids come from the `Clock` and `Ids` ports in `apps/api/src/ports.ts`; tests use `fixedClock` and `sequentialIds`. A seeded model-based test runs random command sequences for several users against the real API on Postgres and against `test/model/referenceModel.ts`, and compares what each user sees after every command. A failure prints the seed that replays it. Full simulation (simulated database, network, scheduler) was considered and rejected: nothing here is concurrent or distributed. | decided (owner, 2026-11-16) |
 | D19 | Frontend state machines are reducers over discriminated unions with the transition table exported as data (`apps/web/src/lib/machine.ts`). Considered: XState (a dependency and a learning curve for assessors), stores with flags (the drift this avoids). | decided (owner, 2026-11-16) |
 | D20 | The architecture is enforced by checks, not by prose. The list is in "What enforces it" below; a new rule goes there and into CI in the same change. | decided (owner, 2026-11-16) |
+| D22 | Locations list in insertion order, by an identity column `seq` (owner, 2026-11-17). | decided (owner, 2026-11-17) |
+| D23 | Layout D (#11, PR #67). Map page: a full-screen map beside a dark sidebar (Map, Upload, the user's email, Log out); on a phone the sidebar is a drawer behind a menu button. The add form sits in a sheet at the bottom centre: one row on desktop (name, latitude, longitude, Add), stacked fields on a phone. Swiping up on the sheet's handle reveals "Your locations (n)" and swiping down hides it; a tap, Enter or Space on the handle also toggles it. The map keeps its markers clear of the sheet. Upload page: the upload card beside the list of locations. Field errors show under the field. Screenshots: `docs/design/layout-d-*.jpg`. Considered: A (floating form, top right), B (a form and list column beside the map), C (one centred column). | decided (owner, 2026-11-17) |
 
 ## Limits (D21)
 
@@ -194,9 +196,20 @@ gives the testability where it matters (the parsers and the session rules).
 **D12, not optimistic.** A round trip is short, and the marker needs the server's id for
 React's key. Optimistic adds would need rollback code for a failure the user rarely sees.
 
-**D13, open (frontend session).** R11 says the popup shows for three seconds, *then* the
-locations are added. Options to explore with prototypes: stay on the upload page and add to the
-store after 3 s; or after 3 s go to the map and fit it to the new markers.
+**D13, decided (owner, 2026-11-17).** R11 says the popup shows for three seconds, *then* every
+location in the file is added to the map. The web adds them to the locations store when the
+popup closes, so the map has them, and keeps the user on the upload page, where the new rows are
+highlighted. Going to the map is one click on "See them on the map", which zooms to the new
+markers. Considered: going to the map automatically after 3 s (prototype `afterMap.A`/`B`/`C`);
+the owner preferred staying, so that several files can be uploaded in a row.
+
+**D23, layout D (owner, 2026-11-17).** Chosen from three working prototypes (PR #67, pstack
+`principle-exhaust-the-design-space`): A's full-screen map, a bottom sheet that holds the form and
+swipes up to the list, and B's upload page. The sheet's open or closed state is one boolean in
+the map page; it is a disclosure, not a flow, so it has no state machine. Screenshots, desktop and
+phone: `docs/design/layout-d-markers-desktop.jpg`, `layout-d-sheetOpen-phone.jpg`,
+`layout-d-invalid-phone.jpg`, `layout-d-upload-desktop.jpg`, `layout-d-afterStay-desktop.jpg`,
+`layout-d-afterMap-desktop.jpg` and the rest of `docs/design/`.
 
 ## Out of scope
 
