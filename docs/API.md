@@ -43,6 +43,7 @@ who they are).
 
 ## Examples
 
+<!-- schema: NewLocation -->
 ```http
 POST /api/locations
 Content-Type: application/json
@@ -50,18 +51,20 @@ Content-Type: application/json
 {"name":"Suria KLCC","latitude":3.157324409,"longitude":101.7121981}
 ```
 
+<!-- schema: LocationResponse -->
 ```http
 HTTP/1.1 201 Created
 Content-Type: application/json
 
-{"location":{"id":"7c1e...","name":"Suria KLCC","latitude":3.157324409,"longitude":101.7121981,"createdAt":"2026-11-16T09:30:00.000Z"}}
+{"location":{"id":"7c1e9d04-2a4b-4c8d-9e1f-0123456789ab","name":"Suria KLCC","latitude":3.157324409,"longitude":101.7121981,"createdAt":"2026-11-16T09:30:00.000Z"}}
 ```
 
 A ZIP with two files:
 
+<!-- schema: ErrorBody -->
 ```http
 HTTP/1.1 422 Unprocessable Content
 Content-Type: application/json
 
-{"error":{"code":"ZIP_ENTRY_COUNT","message":"The ZIP must contain exactly one text file; it contains 2 files.","details":{"files":["a.txt","b.txt"]},"requestId":"b0f3..."}}
+{"error":{"code":"ZIP_ENTRY_COUNT","message":"The ZIP must contain exactly one text file; it contains 2 files.","details":{"files":["a.txt","b.txt"]},"requestId":"b0f3a1c2-4d5e-4f6a-8b9c-0123456789ab"}}
 ```

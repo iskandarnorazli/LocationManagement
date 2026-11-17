@@ -1,0 +1,5 @@
+ts	phase	decision	why	evidence	result
+2026-11-17T03:37:02Z	plan	opened task audit-lm-2026-11-17	Review the eight Antigravity PRs, merge what passes, close their issues with evidence, open the next issues		open
+2026-11-17T03:37:02Z	plan	playbook audit-day: 7 steps copied	matched to the task	/root/.claude/plugins/synced/0b5bae93-7c1e-4f6a-91df-e84ca7730170_4b176d38-8512-4ae7-a7a7-9c0a94655468/iskandar-stack/skills/iskandar-mode/playbooks/audit-day.md	
+2026-11-17T03:37:02Z	build	phase plan -> build	owner asked		build
+2026-11-17T03:37:02Z	build	merge as one integration PR	three PRs edit package.json and the lock; one regeneration instead of two conflicts	merge log: conflict only in apps/api/package.json and package-lock.json	audit/lm-batch-2026-11-17
